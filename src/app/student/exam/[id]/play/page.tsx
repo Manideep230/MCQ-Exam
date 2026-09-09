@@ -17,7 +17,7 @@ interface QuestionItem {
   options: QuestionOption[];
   savedAnswer: {
     selectedOption: 'A' | 'B' | 'C' | 'D';
-    justification: string;
+    justification?: string;
   } | null;
 }
 
@@ -48,8 +48,8 @@ export default function ExamPlayPage() {
   const [questions, setQuestions] = useState<QuestionItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Local answer state map: questionId -> { selectedOption, justification, saved }
-  const [answersMap, setAnswersMap] = useState<Record<string, { selectedOption: 'A' | 'B' | 'C' | 'D' | null; justification: string; saved: boolean }>>({});
+  // Local answer state map: questionId -> { selectedOption, saved }
+  const [answersMap, setAnswersMap] = useState<Record<string, { selectedOption: 'A' | 'B' | 'C' | 'D' | null; saved: boolean }>>({});
   
   // Timer & Status
   const [remainingSeconds, setRemainingSeconds] = useState<number>(0);
@@ -84,11 +84,10 @@ export default function ExamPlayPage() {
       setQuestions(data.questions);
 
       // Populate initial answers map
-      const initialMap: Record<string, { selectedOption: 'A' | 'B' | 'C' | 'D' | null; justification: string; saved: boolean }> = {};
+      const initialMap: Record<string, { selectedOption: 'A' | 'B' | 'C' | 'D' | null; saved: boolean }> = {};
       data.questions.forEach((q: QuestionItem) => {
         initialMap[q.id] = {
           selectedOption: q.savedAnswer?.selectedOption || null,
-          justification: q.savedAnswer?.justification || '',
           saved: !!q.savedAnswer,
         };
       });
@@ -198,18 +197,13 @@ export default function ExamPlayPage() {
       return false;
     };
 
-    // Prevent Copy/Paste/Cut & Ctrl key combinations
+    // Prevent Copy/Paste/Cut
     const handleCopyPaste = (e: ClipboardEvent) => {
-      // Allow copy/paste inside justification textarea if needed, but restrict on body
-      const target = e.target as HTMLElement;
-      if (target.tagName !== 'TEXTAREA') {
-        e.preventDefault();
-      }
+      e.preventDefault();
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Disable F12, Ctrl+Shift+I, Ctrl+U, Ctrl+C, Ctrl+V outside textarea
-      const target = e.target as HTMLElement;
+      // Disable F12, Ctrl+Shift+I, Ctrl+U, Ctrl+C, Ctrl+V
       if (
         e.key === 'F12' ||
         (e.ctrlKey && e.shiftKey && e.key === 'I') ||
@@ -218,9 +212,7 @@ export default function ExamPlayPage() {
         e.preventDefault();
       }
       if ((e.ctrlKey || e.metaKey) && ['c', 'v', 'x', 'a'].includes(e.key.toLowerCase())) {
-        if (target.tagName !== 'TEXTAREA') {
-          e.preventDefault();
-        }
+        e.preventDefault();
       }
     };
 
@@ -278,20 +270,7 @@ export default function ExamPlayPage() {
     setAnswersMap(prev => ({
       ...prev,
       [currentQuestion.id]: {
-        ...prev[currentQuestion.id],
         selectedOption: optionKey,
-        saved: false,
-      }
-    }));
-  };
-
-  const handleJustificationChange = (text: string) => {
-    if (!currentQuestion) return;
-    setAnswersMap(prev => ({
-      ...prev,
-      [currentQuestion.id]: {
-        ...prev[currentQuestion.id],
-        justification: text,
         saved: false,
       }
     }));
@@ -305,11 +284,6 @@ export default function ExamPlayPage() {
       return false;
     }
 
-    if (currentAnswer.justification.trim().length < 15) {
-      setErrorMsg('Justification must be at least 15 characters long explaining your answer.');
-      return false;
-    }
-
     setErrorMsg(null);
     setSavingStatus('saving');
 
@@ -320,7 +294,6 @@ export default function ExamPlayPage() {
         body: JSON.stringify({
           questionId: currentQuestion.id,
           selectedOption: currentAnswer.selectedOption,
-          justification: currentAnswer.justification.trim(),
         }),
       });
 
@@ -348,8 +321,12 @@ export default function ExamPlayPage() {
   };
 
   const handleNext = async () => {
-    const success = await saveCurrentAnswer();
-    if (success && currentIndex < questions.length - 1) {
+    if (currentAnswer?.selectedOption && !currentAnswer.saved) {
+      const success = await saveCurrentAnswer();
+      if (success && currentIndex < questions.length - 1) {
+        setCurrentIndex(prev => prev + 1);
+      }
+    } else if (currentIndex < questions.length - 1) {
       setCurrentIndex(prev => prev + 1);
     }
   };
@@ -371,7 +348,7 @@ export default function ExamPlayPage() {
 
     try {
       // Attempt to save current question first if modified
-      if (currentAnswer?.selectedOption && currentAnswer?.justification.trim().length >= 15 && !currentAnswer.saved) {
+      if (currentAnswer?.selectedOption && !currentAnswer.saved) {
         await saveCurrentAnswer();
       }
 
@@ -434,7 +411,7 @@ export default function ExamPlayPage() {
     );
   }
 
-  const answeredCount = Object.values(answersMap).filter(a => a.selectedOption !== null && a.justification.trim().length >= 15).length;
+  const answeredCount = Object.values(answersMap).filter(a => a.selectedOption !== null).length;
   const minutesLeft = Math.floor(remainingSeconds / 60);
   const secondsLeft = remainingSeconds % 60;
   const timeFormatted = `${String(minutesLeft).padStart(2, '0')}:${String(secondsLeft).padStart(2, '0')}`;
@@ -447,7 +424,7 @@ export default function ExamPlayPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <span className="text-xs font-bold text-blue-400 uppercase tracking-widest hidden sm:inline">
-              AI EXAM PORTAL
+              ONLINE EXAM
             </span>
             <span className="text-sm font-bold text-white truncate max-w-[150px] sm:max-w-xs">
               {exam?.title}
@@ -550,30 +527,6 @@ export default function ExamPlayPage() {
                 })}
               </div>
 
-              {/* Mandatory Justification Textarea */}
-              <div className="pt-4 border-t border-slate-800/80 space-y-2">
-                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider">
-                  Why did you choose this answer? <span className="text-red-400">*</span>
-                  <span className="text-[10px] text-slate-500 font-normal ml-2">(Minimum 15 characters required)</span>
-                </label>
-                
-                {/* Note: Textarea must allow user select / text input */}
-                <textarea
-                  rows={3}
-                  value={currentAnswer?.justification || ''}
-                  onChange={(e) => handleJustificationChange(e.target.value)}
-                  placeholder="Explain the technical reasoning supporting your selected answer here..."
-                  className="w-full p-3.5 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm leading-relaxed transition-all select-text cursor-text"
-                />
-                
-                <div className="flex justify-between items-center text-[10px] text-slate-500">
-                  <span>AI Justification Evaluator Active</span>
-                  <span className={currentAnswer?.justification && currentAnswer.justification.trim().length >= 15 ? 'text-emerald-400 font-bold' : 'text-amber-400'}>
-                    {currentAnswer?.justification?.trim().length || 0} / 15 chars min
-                  </span>
-                </div>
-              </div>
-
               {/* Action Buttons */}
               <div className="pt-4 flex items-center justify-between border-t border-slate-800/80">
                 <button
@@ -601,7 +554,7 @@ export default function ExamPlayPage() {
         {/* Right Column: Question Navigator Sidebar */}
         <div className="space-y-6">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 shadow-xl">
-            <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center justify-between">
+            <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-between justify-between">
               <span>Question Navigator</span>
               <span className="text-blue-400 font-mono">{answeredCount} / {questions.length}</span>
             </h3>
@@ -622,7 +575,7 @@ export default function ExamPlayPage() {
             <div className="grid grid-cols-5 gap-2 pt-2 max-h-[320px] overflow-y-auto">
               {questions.map((q, idx) => {
                 const ans = answersMap[q.id];
-                const isAnswered = ans && ans.selectedOption !== null && ans.justification.trim().length >= 15;
+                const isAnswered = ans && ans.selectedOption !== null;
                 const isCurrent = idx === currentIndex;
 
                 return (
@@ -657,7 +610,7 @@ export default function ExamPlayPage() {
 
       </main>
 
-      {/* Fullscreen Exit Warning Modal (Section 24) */}
+      {/* Fullscreen Exit Warning Modal */}
       {showWarningModal && (
         <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-slate-900 border-2 border-red-600 rounded-2xl p-6 sm:p-8 max-w-md w-full text-center space-y-5 shadow-2xl animate-bounce-short">
@@ -681,7 +634,7 @@ export default function ExamPlayPage() {
         </div>
       )}
 
-      {/* Manual Submit Confirmation Modal (Section 27) */}
+      {/* Manual Submit Confirmation Modal */}
       {showSubmitModal && (
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-md w-full space-y-6 shadow-2xl">

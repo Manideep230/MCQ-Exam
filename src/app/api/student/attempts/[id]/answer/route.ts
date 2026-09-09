@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
 import { getDb, COLLECTIONS } from '@/db';
 import { AttemptDoc, QuestionDoc, AnswerDoc } from '@/db/schema';
-import { evaluateJustification } from '@/lib/ai-evaluator';
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getAuthSession();
@@ -17,16 +16,12 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   try {
     const { questionId, selectedOption, justification } = await req.json();
 
-    if (!questionId || !selectedOption || !justification) {
-      return NextResponse.json({ error: 'Missing questionId, selectedOption, or justification' }, { status: 400 });
+    if (!questionId || !selectedOption) {
+      return NextResponse.json({ error: 'Missing questionId or selectedOption' }, { status: 400 });
     }
 
     if (!['A', 'B', 'C', 'D'].includes(selectedOption)) {
       return NextResponse.json({ error: 'Invalid option selected' }, { status: 400 });
-    }
-
-    if (justification.trim().length < 15) {
-      return NextResponse.json({ error: 'Justification must be at least 15 characters long.' }, { status: 400 });
     }
 
     const db = await getDb();
@@ -59,27 +54,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       return NextResponse.json({ error: 'Question not found' }, { status: 404 });
     }
 
-    const getOptText = (key: 'A' | 'B' | 'C' | 'D') => {
-      if (!question.options) return '';
-      if (Array.isArray(question.options)) {
-        const found = (question.options as any[]).find((o: any) => o.optionKey === key);
-        return found ? found.optionText : '';
-      }
-      return (question.options as any)[key] || '';
-    };
-
-    // Perform AI evaluation server-side
-    const aiResult = await evaluateJustification({
-      questionText: question.questionText,
-      optionA: getOptText('A'),
-      optionB: getOptText('B'),
-      optionC: getOptText('C'),
-      optionD: getOptText('D'),
-      correctOption: question.correctOption,
-      studentOption: selectedOption,
-      justification: justification.trim(),
-      marks: question.marks,
-    });
+    // Evaluate correct MCQ option directly without mandatory justification
+    const isCorrect = selectedOption === question.correctOption;
+    const finalScore = isCorrect ? (question.marks || 1) : 0;
 
     const answerId = `ans_${attemptId}_${questionId}`;
 
@@ -91,13 +68,13 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
           attemptId,
           questionId,
           selectedOption,
-          justification: justification.trim(),
-          aiOptionCorrect: aiResult.optionCorrect,
-          aiJustificationQuality: aiResult.justificationQuality,
-          aiJustificationScore: aiResult.justificationScore,
-          finalScore: aiResult.finalScore,
-          aiReason: aiResult.reason,
-          evaluationStatus: aiResult.evaluationStatus,
+          justification: (justification || '').trim(),
+          aiOptionCorrect: isCorrect,
+          aiJustificationQuality: 'Standard MCQ',
+          aiJustificationScore: 0,
+          finalScore: finalScore,
+          aiReason: isCorrect ? 'Correct option selected' : 'Incorrect option selected',
+          evaluationStatus: 'completed',
           answeredAt: nowIso,
           updatedAt: nowIso,
         }

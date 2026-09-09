@@ -156,7 +156,7 @@ export default function ExamInstructionsPage() {
 
             <div>
               <span className="text-[10px] text-slate-400 uppercase font-semibold block">EVALUATION</span>
-              <span className="text-sm font-bold text-blue-400 mt-0.5 block">AI Justified</span>
+              <span className="text-sm font-bold text-emerald-400 mt-0.5 block">Objective MCQ</span>
             </div>
           </div>
 
@@ -199,7 +199,7 @@ export default function ExamInstructionsPage() {
               <li className="flex items-start space-x-3 bg-slate-950/40 p-3 rounded-xl border border-slate-800/60">
                 <CheckSquare className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                 <div>
-                  <strong className="text-white">AI Justification Requirement:</strong> For every question, you must select one option and write a brief explanation (minimum 15 characters) explaining why your choice is correct.
+                  <strong className="text-white">MCQ Selection:</strong> For each question, select the correct option (A, B, C, or D) and proceed to the next question.
                 </div>
               </li>
             </ul>

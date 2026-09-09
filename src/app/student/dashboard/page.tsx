@@ -28,6 +28,9 @@ interface ExamItem {
     startedAt: string;
     deadlineAt: string;
     submittedAt?: string;
+    score?: number;
+    totalMarks?: number;
+    percentage?: number;
   } | null;
 }
 
@@ -252,13 +255,25 @@ function ExamCard({ exam, onStart, onResult }: { exam: ExamItem; onStart?: () =>
           <span className="font-semibold text-white">{exam.questionCount} Questions</span>
         </div>
 
-        <div className="flex items-center justify-between">
-          <span className="flex items-center space-x-1.5 text-slate-400">
-            <Award className="w-3.5 h-3.5 text-amber-400" />
-            <span>Total Marks:</span>
-          </span>
-          <span className="font-semibold text-white">{exam.totalMarks} Marks</span>
-        </div>
+        {exam.status === 'Completed' && exam.attempt?.score !== undefined ? (
+          <div className="flex items-center justify-between p-2.5 rounded-xl bg-blue-950/60 border border-blue-800/80">
+            <span className="flex items-center space-x-1.5 text-blue-300 font-bold">
+              <Award className="w-4 h-4 text-amber-400" />
+              <span>Your Score:</span>
+            </span>
+            <span className="font-mono text-sm font-black text-white">
+              {exam.attempt.score} / {exam.attempt.totalMarks || exam.totalMarks} ({exam.attempt.percentage}%)
+            </span>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between">
+            <span className="flex items-center space-x-1.5 text-slate-400">
+              <Award className="w-3.5 h-3.5 text-amber-400" />
+              <span>Total Marks:</span>
+            </span>
+            <span className="font-semibold text-white">{exam.totalMarks} Marks</span>
+          </div>
+        )}
 
         <div className="flex items-center justify-between">
           <span className="flex items-center space-x-1.5 text-slate-400">

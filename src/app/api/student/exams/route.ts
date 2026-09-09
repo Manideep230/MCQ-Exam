@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
 import { getDb, COLLECTIONS } from '@/db';
-import { ExamDoc, AttemptDoc, QuestionDoc } from '@/db/schema';
+import { ExamDoc, AttemptDoc, QuestionDoc, AnswerDoc } from '@/db/schema';
 
 export async function GET(req: NextRequest) {
   const session = await getAuthSession();
@@ -29,26 +29,41 @@ export async function GET(req: NextRequest) {
       const questionCount = await db.collection<QuestionDoc>(COLLECTIONS.questions).countDocuments({ examId: exam._id });
 
       let computedStatus: 'Upcoming' | 'Available' | 'Completed' | 'Expired' = 'Upcoming';
+      let score = 0;
 
-      if (attempt?.status === 'submitted') {
-        computedStatus = 'Completed';
-      } else if (now < start) {
-        computedStatus = 'Upcoming';
-      } else if (now >= start && now < end) {
-        if (attempt?.status === 'in_progress') {
-          // Check if active attempt deadline has passed
-          const deadline = new Date(attempt.deadlineAt);
-          if (now > deadline) {
-            computedStatus = 'Expired';
+      if (attempt) {
+        if (attempt.status === 'submitted') {
+          computedStatus = 'Completed';
+          const answers = await db.collection<AnswerDoc>(COLLECTIONS.answers).find({ attemptId: attempt._id }).toArray();
+          score = answers.reduce((sum, a) => sum + (a.finalScore || 0), 0);
+        } else if (now < start) {
+          computedStatus = 'Upcoming';
+        } else if (now >= start && now < end) {
+          if (attempt.status === 'in_progress') {
+            const deadline = new Date(attempt.deadlineAt);
+            if (now > deadline) {
+              computedStatus = 'Expired';
+            } else {
+              computedStatus = 'Available'; // Active attempt to resume
+            }
           } else {
-            computedStatus = 'Available'; // Active attempt to resume
+            computedStatus = 'Available';
           }
         } else {
-          computedStatus = 'Available';
+          computedStatus = 'Expired';
         }
       } else {
-        computedStatus = 'Expired';
+        if (now < start) {
+          computedStatus = 'Upcoming';
+        } else if (now >= start && now < end) {
+          computedStatus = 'Available';
+        } else {
+          computedStatus = 'Expired';
+        }
       }
+
+      const totalMarks = exam.totalMarks || questionCount || 30;
+      const percentage = totalMarks > 0 ? Math.round((score / totalMarks) * 100) : 0;
 
       return {
         id: exam._id,
@@ -59,6 +74,7 @@ export async function GET(req: NextRequest) {
         questionCount,
         startAt: exam.startAt,
         endAt: exam.endAt,
+        showResults: exam.showResults,
         status: computedStatus,
         attempt: attempt ? {
           id: attempt._id,
@@ -66,6 +82,9 @@ export async function GET(req: NextRequest) {
           startedAt: attempt.startedAt,
           deadlineAt: attempt.deadlineAt,
           submittedAt: attempt.submittedAt,
+          score: score,
+          totalMarks: totalMarks,
+          percentage: percentage,
         } : null,
       };
     }));
