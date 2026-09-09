@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
-import { db } from '@/db';
-import { examEvents, attempts, students, exams } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { getDb, COLLECTIONS } from '@/db';
+import { AttemptDoc, ExamEventDoc, StudentDoc, ExamDoc } from '@/db/schema';
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getAuthSession();
@@ -11,26 +10,28 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 
   try {
-    const attemptList = await db.select().from(attempts).where(eq(attempts.id, params.id));
-    const attempt = attemptList[0];
+    const db = await getDb();
+    const attempt = await db.collection<AttemptDoc>(COLLECTIONS.attempts).findOne({ _id: params.id });
 
     if (!attempt) {
       return NextResponse.json({ error: 'Attempt not found' }, { status: 404 });
     }
 
-    const eventsList = await db.select().from(examEvents)
-      .where(eq(examEvents.attemptId, attempt.id))
-      .orderBy(examEvents.eventTimestamp);
+    const eventsList = await db.collection<ExamEventDoc>(COLLECTIONS.examEvents)
+      .find({ attemptId: attempt._id })
+      .sort({ eventTimestamp: 1 })
+      .toArray();
 
-    const studentList = await db.select().from(students).where(eq(students.id, attempt.studentId));
-    const student = studentList[0];
+    const student = await db.collection<StudentDoc>(COLLECTIONS.students).findOne({
+      $or: [{ _id: attempt.studentId }, { rollNumber: attempt.studentId }]
+    });
 
-    const examList = await db.select().from(exams).where(eq(exams.id, attempt.examId));
-    const exam = examList[0];
+    const exam = await db.collection<ExamDoc>(COLLECTIONS.exams).findOne({ _id: attempt.examId });
 
     return NextResponse.json({
       attempt: {
-        id: attempt.id,
+        id: attempt._id,
+        _id: attempt._id,
         status: attempt.status,
         startedAt: attempt.startedAt,
         submittedAt: attempt.submittedAt || attempt.deadlineAt,
@@ -39,13 +40,14 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
         tabSwitchCount: attempt.tabSwitchCount,
       },
       student: {
-        rollNumber: student?.rollNumber || 'N/A',
+        rollNumber: student?.rollNumber || attempt.studentId,
         fullName: student?.fullName || 'Not Profiled Yet',
         branch: student?.branch || '-',
       },
       examTitle: exam?.title || 'Unknown Exam',
       events: eventsList.map(e => ({
-        id: e.id,
+        id: e._id,
+        _id: e._id,
         eventType: e.eventType,
         eventTimestamp: e.eventTimestamp,
         metadata: e.metadata,

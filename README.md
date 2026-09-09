@@ -1,6 +1,6 @@
 # AI EXAM PORTAL - ONLINE EXAMINATION SYSTEM
 
-Production-ready, highly responsive **Online Examination Portal** for conducting MCQ-based examinations with AI-powered justification evaluation, real-time proctoring (fullscreen and tab visibility monitoring), server-side timing controls, and SQLite persistence powered by **Turso (libSQL)** and **Drizzle ORM**.
+Production-ready, highly responsive **Online Examination Portal** for conducting MCQ-based examinations with AI-powered justification evaluation, real-time proctoring (fullscreen and tab visibility monitoring), server-side timing controls, and scalable persistence powered by **MongoDB Atlas**.
 
 Designed for seamless deployment on **Vercel** and local development.
 
@@ -34,7 +34,7 @@ Designed for seamless deployment on **Vercel** and local development.
 
 ### 🤖 AI Justification Evaluator (`src/lib/ai-evaluator.ts`)
 - Evaluates student explanations using OpenAI API (`gpt-4o-mini`).
-- Authoritative correct option stored in SQLite acts as the source of truth.
+- Authoritative correct option stored in MongoDB acts as the source of truth.
 - **Scoring Rules**:
   - Wrong option choice $\rightarrow$ **0 marks**
   - Correct option + Good/Excellent justification $\rightarrow$ **Full marks**
@@ -48,7 +48,7 @@ Designed for seamless deployment on **Vercel** and local development.
 
 - **Framework**: Next.js 14 (App Router, TypeScript, Route Handlers)
 - **Styling**: Tailwind CSS (Vanilla CSS design system)
-- **Database**: Turso (libSQL/SQLite compatible) with Drizzle ORM
+- **Database**: MongoDB Atlas (Native Node.js MongoDB Driver)
 - **Authentication**: JWT via `jose` stored in secure HTTP-only cookies
 - **Password Hashing**: `bcryptjs`
 - **AI Integration**: OpenAI SDK (`gpt-4o-mini`)

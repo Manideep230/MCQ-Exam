@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
-import { db } from '@/db';
-import { students, attempts, exams, answers } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { getDb, COLLECTIONS } from '@/db';
+import { StudentDoc, AttemptDoc, ExamDoc, AnswerDoc, ExamEventDoc } from '@/db/schema';
 import { hashPassword } from '@/lib/password';
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
@@ -12,23 +11,29 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 
   try {
-    const studentList = await db.select().from(students).where(eq(students.id, params.id));
-    const student = studentList[0];
+    const db = await getDb();
+    const student = await db.collection<StudentDoc>(COLLECTIONS.students).findOne({
+      $or: [{ _id: params.id }, { rollNumber: params.id }]
+    });
 
     if (!student) {
       return NextResponse.json({ error: 'Student not found' }, { status: 404 });
     }
 
-    const studentAttempts = await db.select().from(attempts).where(eq(attempts.studentId, student.id));
-    const examList = await db.select().from(exams);
+    const studentAttempts = await db.collection<AttemptDoc>(COLLECTIONS.attempts).find({
+      $or: [{ studentId: student._id }, { studentId: student.rollNumber }]
+    }).toArray();
+
+    const examList = await db.collection<ExamDoc>(COLLECTIONS.exams).find({}).toArray();
+    const examMap = new Map(examList.map(e => [e._id, e]));
 
     const history = await Promise.all(studentAttempts.map(async (att) => {
-      const exam = examList.find(e => e.id === att.examId);
-      const attAnswers = await db.select().from(answers).where(eq(answers.attemptId, att.id));
+      const exam = examMap.get(att.examId);
+      const attAnswers = await db.collection<AnswerDoc>(COLLECTIONS.answers).find({ attemptId: att._id }).toArray();
       const score = attAnswers.reduce((sum, a) => sum + (a.finalScore || 0), 0);
 
       return {
-        attemptId: att.id,
+        attemptId: att._id,
         examTitle: exam?.title || 'Unknown Exam',
         status: att.status,
         startedAt: att.startedAt,
@@ -43,7 +48,8 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
     return NextResponse.json({
       student: {
-        id: student.id,
+        id: student._id,
+        _id: student._id,
         rollNumber: student.rollNumber,
         fullName: student.fullName,
         branch: student.branch,
@@ -71,14 +77,16 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     const body = await req.json();
     const { accountStatus, newPassword, fullName, branch, collegeName } = body;
 
-    const studentList = await db.select().from(students).where(eq(students.id, params.id));
-    const student = studentList[0];
+    const db = await getDb();
+    const student = await db.collection<StudentDoc>(COLLECTIONS.students).findOne({
+      $or: [{ _id: params.id }, { rollNumber: params.id }]
+    });
 
     if (!student) {
       return NextResponse.json({ error: 'Student not found' }, { status: 404 });
     }
 
-    const updates: Partial<typeof student> = {
+    const updates: any = {
       updatedAt: new Date().toISOString(),
     };
 
@@ -94,7 +102,10 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     if (branch !== undefined) updates.branch = branch.trim();
     if (collegeName !== undefined) updates.collegeName = collegeName.trim();
 
-    await db.update(students).set(updates).where(eq(students.id, params.id));
+    await db.collection<StudentDoc>(COLLECTIONS.students).updateOne(
+      { _id: student._id },
+      { $set: updates }
+    );
 
     return NextResponse.json({ success: true, message: 'Student updated successfully' });
 
@@ -111,7 +122,24 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   }
 
   try {
-    await db.delete(students).where(eq(students.id, params.id));
+    const db = await getDb();
+    const student = await db.collection<StudentDoc>(COLLECTIONS.students).findOne({
+      $or: [{ _id: params.id }, { rollNumber: params.id }]
+    });
+
+    if (student) {
+      await db.collection<StudentDoc>(COLLECTIONS.students).deleteOne({ _id: student._id });
+      const attempts = await db.collection<AttemptDoc>(COLLECTIONS.attempts).find({
+        $or: [{ studentId: student._id }, { studentId: student.rollNumber }]
+      }).toArray();
+      const attemptIds = attempts.map(a => a._id);
+      if (attemptIds.length > 0) {
+        await db.collection<AttemptDoc>(COLLECTIONS.attempts).deleteMany({ _id: { $in: attemptIds } });
+        await db.collection<AnswerDoc>(COLLECTIONS.answers).deleteMany({ attemptId: { $in: attemptIds } });
+        await db.collection<ExamEventDoc>(COLLECTIONS.examEvents).deleteMany({ attemptId: { $in: attemptIds } });
+      }
+    }
+
     return NextResponse.json({ success: true, message: 'Student deleted successfully' });
   } catch (error: any) {
     console.error('Delete Student Error:', error);

@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
-import { db } from '@/db';
-import { attempts, exams } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { getDb, COLLECTIONS } from '@/db';
+import { AttemptDoc } from '@/db/schema';
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getAuthSession();
@@ -15,10 +14,10 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const nowIso = now.toISOString();
 
   try {
-    const attemptList = await db.select().from(attempts).where(eq(attempts.id, attemptId));
-    const attempt = attemptList[0];
+    const db = await getDb();
+    const attempt = await db.collection<AttemptDoc>(COLLECTIONS.attempts).findOne({ _id: attemptId });
 
-    if (!attempt || attempt.studentId !== session.id) {
+    if (!attempt || (attempt.studentId !== session.id && attempt.studentId !== session.identifier && attempt.studentId !== `student_${session.identifier}`)) {
       return NextResponse.json({ error: 'Attempt not found' }, { status: 404 });
     }
 
@@ -35,11 +34,16 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     // 1. Deadline check
     if (now >= deadline) {
-      await db.update(attempts).set({
-        status: 'expired',
-        submittedAt: attempt.deadlineAt,
-        updatedAt: nowIso,
-      }).where(eq(attempts.id, attemptId));
+      await db.collection<AttemptDoc>(COLLECTIONS.attempts).updateOne(
+        { _id: attemptId },
+        {
+          $set: {
+            status: 'expired',
+            submittedAt: attempt.deadlineAt,
+            updatedAt: nowIso,
+          }
+        }
+      );
 
       return NextResponse.json({
         status: 'expired',
@@ -50,10 +54,15 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     }
 
     // Update last_seen_at
-    await db.update(attempts).set({
-      lastSeenAt: nowIso,
-      updatedAt: nowIso,
-    }).where(eq(attempts.id, attemptId));
+    await db.collection<AttemptDoc>(COLLECTIONS.attempts).updateOne(
+      { _id: attemptId },
+      {
+        $set: {
+          lastSeenAt: nowIso,
+          updatedAt: nowIso,
+        }
+      }
+    );
 
     const remainingMs = deadline.getTime() - now.getTime();
     const remainingSeconds = Math.max(0, Math.floor(remainingMs / 1000));

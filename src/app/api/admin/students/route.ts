@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
-import { db } from '@/db';
-import { students, attempts } from '@/db/schema';
-import { eq, like, or } from 'drizzle-orm';
+import { getDb, COLLECTIONS } from '@/db';
+import { StudentDoc } from '@/db/schema';
 import { hashPassword } from '@/lib/password';
 
 export async function GET(req: NextRequest) {
@@ -15,22 +14,29 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const query = searchParams.get('q')?.trim();
 
-    let studentList;
+    const db = await getDb();
+    let filter: any = {};
+
     if (query) {
-      studentList = await db.select().from(students)
-        .where(or(
-          like(students.rollNumber, `%${query}%`),
-          like(students.fullName, `%${query}%`),
-          like(students.branch, `%${query}%`),
-          like(students.collegeName, `%${query}%`)
-        ))
-        .orderBy(students.rollNumber);
-    } else {
-      studentList = await db.select().from(students).orderBy(students.rollNumber);
+      const regex = new RegExp(query, 'i');
+      filter = {
+        $or: [
+          { rollNumber: regex },
+          { fullName: regex },
+          { branch: regex },
+          { collegeName: regex },
+        ]
+      };
     }
 
+    const studentList = await db.collection<StudentDoc>(COLLECTIONS.students)
+      .find(filter)
+      .sort({ rollNumber: 1 })
+      .toArray();
+
     const sanitizedStudents = studentList.map(s => ({
-      id: s.id,
+      id: s._id,
+      _id: s._id,
       rollNumber: s.rollNumber,
       fullName: s.fullName || 'Not Profiled Yet',
       branch: s.branch || '-',
@@ -61,23 +67,32 @@ export async function POST(req: NextRequest) {
     }
 
     const rollUpper = rollNumber.trim().toUpperCase();
+    const db = await getDb();
 
     // Check duplicate
-    const existing = await db.select().from(students).where(eq(students.rollNumber, rollUpper));
-    if (existing.length > 0) {
+    const existing = await db.collection<StudentDoc>(COLLECTIONS.students).findOne({ rollNumber: rollUpper });
+    if (existing) {
       return NextResponse.json({ error: `Student with Roll Number ${rollUpper} already exists.` }, { status: 400 });
     }
 
     const passwordHash = await hashPassword(password.trim());
     const studentId = `student_${rollUpper}`;
+    const nowIso = new Date().toISOString();
 
-    await db.insert(students).values({
-      id: studentId,
+    const newStudent: StudentDoc = {
+      _id: studentId,
       rollNumber: rollUpper,
       passwordHash,
+      fullName: null,
+      branch: null,
+      collegeName: null,
       profileCompleted: false, // Force student first login profile step!
       accountStatus: 'active',
-    });
+      createdAt: nowIso,
+      updatedAt: nowIso,
+    };
+
+    await db.collection<StudentDoc>(COLLECTIONS.students).insertOne(newStudent);
 
     return NextResponse.json({
       success: true,

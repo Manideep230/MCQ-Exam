@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
-import { db } from '@/db';
-import { attempts, students, exams, questions, options, answers } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { getDb, COLLECTIONS } from '@/db';
+import { AttemptDoc, StudentDoc, ExamDoc, QuestionDoc, AnswerDoc } from '@/db/schema';
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getAuthSession();
@@ -11,44 +10,58 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 
   try {
-    const attemptList = await db.select().from(attempts).where(eq(attempts.id, params.id));
-    const attempt = attemptList[0];
+    const db = await getDb();
+    const attempt = await db.collection<AttemptDoc>(COLLECTIONS.attempts).findOne({ _id: params.id });
 
     if (!attempt) {
       return NextResponse.json({ error: 'Attempt not found' }, { status: 404 });
     }
 
-    const studentList = await db.select().from(students).where(eq(students.id, attempt.studentId));
-    const student = studentList[0];
+    const student = await db.collection<StudentDoc>(COLLECTIONS.students).findOne({
+      $or: [{ _id: attempt.studentId }, { rollNumber: attempt.studentId }]
+    });
 
-    const examList = await db.select().from(exams).where(eq(exams.id, attempt.examId));
-    const exam = examList[0];
+    const exam = await db.collection<ExamDoc>(COLLECTIONS.exams).findOne({ _id: attempt.examId });
 
-    const questionList = await db.select().from(questions)
-      .where(eq(questions.examId, attempt.examId))
-      .orderBy(questions.orderIndex);
+    const questionList = await db.collection<QuestionDoc>(COLLECTIONS.questions)
+      .find({ examId: attempt.examId })
+      .sort({ orderIndex: 1 })
+      .toArray();
 
-    const allOptions = await db.select().from(options);
-    const allAnswers = await db.select().from(answers).where(eq(answers.attemptId, attempt.id));
+    const allAnswers = await db.collection<AnswerDoc>(COLLECTIONS.answers)
+      .find({ attemptId: attempt._id })
+      .toArray();
 
     const answerMap = new Map(allAnswers.map(a => [a.questionId, a]));
 
     let calculatedScore = 0;
 
     const items = questionList.map(q => {
-      const qOptions = allOptions.filter(o => o.questionId === q.id).sort((a, b) => a.optionKey.localeCompare(b.optionKey));
-      const ans = answerMap.get(q.id);
+      let qOptions: { optionKey: string; optionText: string }[] = [];
+      if (q.options) {
+        if (Array.isArray(q.options)) {
+          qOptions = q.options;
+        } else {
+          qOptions = Object.entries(q.options).map(([k, v]) => ({
+            optionKey: k,
+            optionText: v as string,
+          }));
+        }
+      }
+      qOptions.sort((a, b) => a.optionKey.localeCompare(b.optionKey));
+
+      const ans = answerMap.get(q._id);
 
       if (ans) {
         calculatedScore += (ans.finalScore || 0);
       }
 
       return {
-        questionId: q.id,
+        questionId: q._id,
         questionText: q.questionText,
         marks: q.marks,
         correctOption: q.correctOption,
-        options: qOptions.map(o => ({ optionKey: o.optionKey, optionText: o.optionText })),
+        options: qOptions,
         studentAnswer: ans ? {
           selectedOption: ans.selectedOption,
           justification: ans.justification,
@@ -68,7 +81,8 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
     return NextResponse.json({
       attempt: {
-        id: attempt.id,
+        id: attempt._id,
+        _id: attempt._id,
         status: attempt.status,
         startedAt: attempt.startedAt,
         submittedAt: attempt.submittedAt || attempt.deadlineAt,
@@ -79,7 +93,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
         percentage,
       },
       student: {
-        rollNumber: student?.rollNumber || 'N/A',
+        rollNumber: student?.rollNumber || attempt.studentId,
         fullName: student?.fullName || 'Not Profiled Yet',
         branch: student?.branch || '-',
         collegeName: student?.collegeName || '-',

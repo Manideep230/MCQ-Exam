@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
-import { db } from '@/db';
-import { exams, attempts, questions } from '@/db/schema';
-import { eq, and, sql } from 'drizzle-orm';
+import { getDb, COLLECTIONS } from '@/db';
+import { ExamDoc, AttemptDoc, QuestionDoc } from '@/db/schema';
 
 export async function GET(req: NextRequest) {
   const session = await getAuthSession();
@@ -11,8 +10,11 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const allExams = await db.select().from(exams);
-    const studentAttempts = await db.select().from(attempts).where(eq(attempts.studentId, session.id));
+    const db = await getDb();
+    const allExams = await db.collection<ExamDoc>(COLLECTIONS.exams).find({}).toArray();
+    const studentAttempts = await db.collection<AttemptDoc>(COLLECTIONS.attempts).find({
+      $or: [{ studentId: session.id }, { studentId: session.identifier }, { studentId: `student_${session.identifier}` }]
+    }).toArray();
 
     const now = new Date();
 
@@ -21,11 +23,10 @@ export async function GET(req: NextRequest) {
       const end = new Date(exam.endAt);
 
       // Find existing attempt by this student
-      const attempt = studentAttempts.find(a => a.examId === exam.id);
+      const attempt = studentAttempts.find(a => a.examId === exam._id);
 
       // Count total questions in this exam
-      const qList = await db.select({ id: questions.id }).from(questions).where(eq(questions.examId, exam.id));
-      const questionCount = qList.length;
+      const questionCount = await db.collection<QuestionDoc>(COLLECTIONS.questions).countDocuments({ examId: exam._id });
 
       let computedStatus: 'Upcoming' | 'Available' | 'Completed' | 'Expired' = 'Upcoming';
 
@@ -50,7 +51,7 @@ export async function GET(req: NextRequest) {
       }
 
       return {
-        id: exam.id,
+        id: exam._id,
         title: exam.title,
         description: exam.description,
         durationMinutes: exam.durationMinutes,
@@ -60,7 +61,7 @@ export async function GET(req: NextRequest) {
         endAt: exam.endAt,
         status: computedStatus,
         attempt: attempt ? {
-          id: attempt.id,
+          id: attempt._id,
           status: attempt.status,
           startedAt: attempt.startedAt,
           deadlineAt: attempt.deadlineAt,

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/db';
-import { students, admins } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { getDb, COLLECTIONS } from '@/db';
+import { StudentDoc, AdminDoc } from '@/db/schema';
 import { comparePassword } from '@/lib/password';
 import { signToken, setAuthCookie } from '@/lib/auth';
 
@@ -14,9 +13,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required credentials' }, { status: 400 });
     }
 
+    const db = await getDb();
+
     if (loginType === 'admin') {
-      const adminList = await db.select().from(admins).where(eq(admins.username, identifier.trim()));
-      const admin = adminList[0];
+      const admin = await db.collection<AdminDoc>(COLLECTIONS.admins).findOne({ username: identifier.trim() });
 
       if (!admin) {
         return NextResponse.json({ error: 'Invalid admin username or password' }, { status: 401 });
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
       }
 
       const token = await signToken({
-        id: admin.id,
+        id: admin._id,
         role: 'admin',
         identifier: admin.username,
       });
@@ -39,8 +39,7 @@ export async function POST(req: NextRequest) {
     } else {
       // Student login
       const rollNumberUpper = identifier.trim().toUpperCase();
-      const studentList = await db.select().from(students).where(eq(students.rollNumber, rollNumberUpper));
-      const student = studentList[0];
+      const student = await db.collection<StudentDoc>(COLLECTIONS.students).findOne({ rollNumber: rollNumberUpper });
 
       if (!student) {
         return NextResponse.json({ error: 'Invalid Roll Number or Password' }, { status: 401 });
@@ -56,7 +55,7 @@ export async function POST(req: NextRequest) {
       }
 
       const token = await signToken({
-        id: student.id,
+        id: student._id,
         role: 'student',
         identifier: student.rollNumber,
         fullName: student.fullName || undefined,

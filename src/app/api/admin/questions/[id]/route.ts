@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
-import { db } from '@/db';
-import { questions, options } from '@/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { getDb, COLLECTIONS } from '@/db';
+import { QuestionDoc, AnswerDoc } from '@/db/schema';
 
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getAuthSession();
@@ -14,26 +13,25 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     const body = await req.json();
     const { questionText, optionA, optionB, optionC, optionD, correctOption, marks } = body;
     const nowIso = new Date().toISOString();
+    const db = await getDb();
 
-    await db.update(questions).set({
-      questionText: questionText.trim(),
-      correctOption: correctOption as 'A' | 'B' | 'C' | 'D',
-      marks: Number(marks) || 1,
-      updatedAt: nowIso,
-    }).where(eq(questions.id, params.id));
-
-    const optMap: Record<'A' | 'B' | 'C' | 'D', string> = {
-      A: optionA.trim(),
-      B: optionB.trim(),
-      C: optionC.trim(),
-      D: optionD.trim(),
-    };
-
-    for (const key of ['A', 'B', 'C', 'D'] as ('A' | 'B' | 'C' | 'D')[]) {
-      await db.update(options).set({
-        optionText: optMap[key],
-      }).where(and(eq(options.questionId, params.id), eq(options.optionKey, key)));
-    }
+    await db.collection<QuestionDoc>(COLLECTIONS.questions).updateOne(
+      { _id: params.id },
+      {
+        $set: {
+          questionText: questionText.trim(),
+          correctOption: correctOption as 'A' | 'B' | 'C' | 'D',
+          marks: Number(marks) || 1,
+          options: {
+            A: optionA.trim(),
+            B: optionB.trim(),
+            C: optionC.trim(),
+            D: optionD.trim(),
+          },
+          updatedAt: nowIso,
+        }
+      }
+    );
 
     return NextResponse.json({ success: true, message: 'Question updated successfully' });
   } catch (error: any) {
@@ -49,7 +47,10 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   }
 
   try {
-    await db.delete(questions).where(eq(questions.id, params.id));
+    const db = await getDb();
+    await db.collection<QuestionDoc>(COLLECTIONS.questions).deleteOne({ _id: params.id });
+    await db.collection<AnswerDoc>(COLLECTIONS.answers).deleteMany({ questionId: params.id });
+
     return NextResponse.json({ success: true, message: 'Question deleted successfully' });
   } catch (error: any) {
     return NextResponse.json({ error: 'Failed to delete question' }, { status: 500 });

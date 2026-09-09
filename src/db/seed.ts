@@ -1,7 +1,9 @@
-import { db } from './index';
-import { admins, students, exams, questions, options } from './schema';
-import { hashPassword } from '../lib/password';
-import { eq } from 'drizzle-orm';
+import { MongoClient } from 'mongodb';
+import bcrypt from 'bcryptjs';
+import { AdminDoc, StudentDoc, ExamDoc, QuestionDoc } from './schema';
+
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://manideepjuvvala215_db_user:o8qBudNZ3l42K3qU@cluster0.en0rmfg.mongodb.net/';
+const DB_NAME = process.env.MONGODB_DB_NAME || 'mcq_exam_portal';
 
 const SPECIFIC_ROLL_NUMBERS = [
   // List 1 (13 Roll Numbers)
@@ -209,56 +211,81 @@ const MONGODB_QUESTIONS = [
   }
 ];
 
-export async function seed() {
-  console.log('🌱 Starting database seeding...');
+async function hashPassword(password: string): Promise<string> {
+  const salt = await bcrypt.genSalt(10);
+  return bcrypt.hash(password, salt);
+}
+
+async function seed() {
+  console.log('🌱 Starting MongoDB database seeding...');
+
+  const client = new MongoClient(MONGODB_URI);
+  await client.connect();
+  const db = client.db(DB_NAME);
+
+  console.log(`📦 Connected to MongoDB: ${DB_NAME}`);
 
   // 1. Seed Admin
+  const adminsCol = db.collection<AdminDoc>('admins');
   const adminUsername = process.env.ADMIN_USERNAME || 'admin';
   const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
   const adminHash = await hashPassword(adminPassword);
 
-  const existingAdmin = await db.select().from(admins).where(eq(admins.username, adminUsername));
-  if (existingAdmin.length === 0) {
-    await db.insert(admins).values({
-      id: 'admin_1',
+  const existingAdmin = await adminsCol.findOne({ _id: adminUsername } as any);
+  if (!existingAdmin) {
+    await adminsCol.insertOne({
+      _id: adminUsername,
       username: adminUsername,
       passwordHash: adminHash,
+      createdAt: new Date().toISOString(),
     });
     console.log(`✅ Admin account created: Username="${adminUsername}"`);
+  } else {
+    await adminsCol.updateOne({ _id: adminUsername } as any, { $set: { passwordHash: adminHash } });
+    console.log(`🔄 Admin password updated: Username="${adminUsername}"`);
   }
 
-  // 2. Seed All Specific Student Roll Numbers (Password = Roll Number)
+  // 2. Seed Students
+  const studentsCol = db.collection<StudentDoc>('students');
   for (const roll of SPECIFIC_ROLL_NUMBERS) {
     const passHash = await hashPassword(roll);
-    const existing = await db.select().from(students).where(eq(students.rollNumber, roll));
-    if (existing.length === 0) {
-      await db.insert(students).values({
-        id: `student_${roll}`,
+    const studentId = `student_${roll}`;
+    const existing = await studentsCol.findOne({ _id: studentId } as any);
+
+    if (!existing) {
+      await studentsCol.insertOne({
+        _id: studentId,
         rollNumber: roll,
         passwordHash: passHash,
-        profileCompleted: false, // Forces /first-login onboarding!
+        fullName: null,
+        branch: null,
+        collegeName: null,
+        profileCompleted: false,
         accountStatus: 'active',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       });
       console.log(`✅ Student created: Roll="${roll}" | Password="${roll}"`);
     } else {
-      await db.update(students).set({
-        passwordHash: passHash,
-      }).where(eq(students.rollNumber, roll));
+      await studentsCol.updateOne({ _id: studentId } as any, { $set: { passwordHash: passHash } });
       console.log(`🔄 Student updated: Roll="${roll}" | Password="${roll}"`);
     }
   }
 
   // 3. Seed MongoDB Basics Exam
+  const examsCol = db.collection<ExamDoc>('exams');
+  const questionsCol = db.collection<QuestionDoc>('questions');
   const examId = 'exam_mongodb_basics_1';
-  const existingExam = await db.select().from(exams).where(eq(exams.id, examId));
+
+  const existingExam = await examsCol.findOne({ _id: examId } as any);
 
   const now = new Date();
   const startDate = new Date(now.getTime() - 1000 * 60 * 30); // Started 30 mins ago
   const endDate = new Date(now.getTime() + 1000 * 60 * 60 * 24 * 7); // Active for 7 days
 
-  if (existingExam.length === 0) {
-    await db.insert(exams).values({
-      id: examId,
+  if (!existingExam) {
+    await examsCol.insertOne({
+      _id: examId,
       title: 'MongoDB Basics',
       description: 'Comprehensive evaluation of MongoDB core concepts including CRUD operations, sorting, projections, and limit clauses.',
       durationMinutes: 60,
@@ -269,40 +296,48 @@ export async function seed() {
       showResults: true,
       allowBackNav: true,
       abandonmentTimeoutSeconds: 60,
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString(),
     });
     console.log('✅ Exam created: "MongoDB Basics"');
 
-    // 4. Seed Questions and Options
+    // 4. Seed Questions (with embedded options)
     for (let i = 0; i < MONGODB_QUESTIONS.length; i++) {
       const q = MONGODB_QUESTIONS[i];
       const questionId = `q_mongo_${i + 1}`;
 
-      await db.insert(questions).values({
-        id: questionId,
+      await questionsCol.insertOne({
+        _id: questionId,
         examId: examId,
         questionText: q.text,
         marks: 1,
         correctOption: q.correct as 'A' | 'B' | 'C' | 'D',
         orderIndex: i + 1,
+        options: q.options,
+        createdAt: now.toISOString(),
+        updatedAt: now.toISOString(),
       });
-
-      const optionEntries: ('A' | 'B' | 'C' | 'D')[] = ['A', 'B', 'C', 'D'];
-      for (const optKey of optionEntries) {
-        await db.insert(options).values({
-          id: `opt_${questionId}_${optKey}`,
-          questionId: questionId,
-          optionKey: optKey,
-          optionText: q.options[optKey],
-        });
-      }
     }
-    console.log(`✅ Seeded ${MONGODB_QUESTIONS.length} MongoDB Questions and options.`);
+    console.log(`✅ Seeded ${MONGODB_QUESTIONS.length} MongoDB Questions with embedded options.`);
+  } else {
+    console.log('ℹ️ Exam "MongoDB Basics" already exists. Skipping.');
   }
 
+  // 5. Create indexes for performance
+  await studentsCol.createIndex({ rollNumber: 1 }, { unique: true });
+  await questionsCol.createIndex({ examId: 1 });
+  await db.collection('attempts').createIndex({ examId: 1, studentId: 1 });
+  await db.collection('attempts').createIndex({ studentId: 1 });
+  await db.collection('answers').createIndex({ attemptId: 1 });
+  await db.collection('answers').createIndex({ attemptId: 1, questionId: 1 }, { unique: true });
+  await db.collection('exam_events').createIndex({ attemptId: 1 });
+  console.log('✅ Database indexes created.');
+
   console.log(`🎉 Seeding finished successfully! Total Students Seeded: ${SPECIFIC_ROLL_NUMBERS.length}`);
+
+  await client.close();
 }
 
-// Run if called directly
 seed().catch((err) => {
   console.error('Seed Error:', err);
   process.exit(1);

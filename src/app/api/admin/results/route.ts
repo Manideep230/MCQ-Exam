@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
-import { db } from '@/db';
-import { attempts, students, exams, answers } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { getDb, COLLECTIONS } from '@/db';
+import { AttemptDoc, StudentDoc, ExamDoc, AnswerDoc } from '@/db/schema';
 
 export async function GET(req: NextRequest) {
   const session = await getAuthSession();
@@ -15,26 +14,39 @@ export async function GET(req: NextRequest) {
     const examFilter = searchParams.get('examId');
     const query = searchParams.get('q')?.toLowerCase();
 
-    const allAttempts = await db.select().from(attempts);
-    const allStudents = await db.select().from(students);
-    const allExams = await db.select().from(exams);
-    const allAnswers = await db.select().from(answers);
+    const db = await getDb();
+    const allAttempts = await db.collection<AttemptDoc>(COLLECTIONS.attempts).find({}).toArray();
+    const allStudents = await db.collection<StudentDoc>(COLLECTIONS.students).find({}).toArray();
+    const allExams = await db.collection<ExamDoc>(COLLECTIONS.exams).find({}).toArray();
+    const allAnswers = await db.collection<AnswerDoc>(COLLECTIONS.answers).find({}).toArray();
+
+    const studentMap = new Map<string, StudentDoc>();
+    for (const s of allStudents) {
+      studentMap.set(s._id, s);
+      studentMap.set(s.rollNumber, s);
+      studentMap.set(`student_${s.rollNumber}`, s);
+    }
+
+    const examMap = new Map<string, ExamDoc>();
+    for (const e of allExams) {
+      examMap.set(e._id, e);
+    }
 
     let results = allAttempts.map(att => {
-      const student = allStudents.find(s => s.id === att.studentId);
-      const exam = allExams.find(e => e.id === att.examId);
-      const attAnswers = allAnswers.filter(a => a.attemptId === att.id);
+      const student = studentMap.get(att.studentId);
+      const exam = examMap.get(att.examId);
+      const attAnswers = allAnswers.filter(a => a.attemptId === att._id);
 
       const score = attAnswers.reduce((sum, a) => sum + (a.finalScore || 0), 0);
       const totalMarks = exam?.totalMarks || 30;
       const percentage = totalMarks > 0 ? Math.round((score / totalMarks) * 100) : 0;
 
       return {
-        attemptId: att.id,
+        attemptId: att._id,
         examId: att.examId,
         examTitle: exam?.title || 'Unknown Exam',
         studentId: att.studentId,
-        rollNumber: student?.rollNumber || 'N/A',
+        rollNumber: student?.rollNumber || att.studentId,
         studentName: student?.fullName || 'Not Profiled Yet',
         branch: student?.branch || '-',
         collegeName: student?.collegeName || '-',

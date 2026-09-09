@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
-import { db } from '@/db';
-import { attempts, examEvents } from '@/db/schema';
-import { eq, sql } from 'drizzle-orm';
+import { getDb, COLLECTIONS } from '@/db';
+import { AttemptDoc, ExamEventDoc } from '@/db/schema';
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getAuthSession();
@@ -20,17 +19,17 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       return NextResponse.json({ error: 'Missing eventType' }, { status: 400 });
     }
 
-    const attemptList = await db.select().from(attempts).where(eq(attempts.id, attemptId));
-    const attempt = attemptList[0];
+    const db = await getDb();
+    const attempt = await db.collection<AttemptDoc>(COLLECTIONS.attempts).findOne({ _id: attemptId });
 
-    if (!attempt || attempt.studentId !== session.id) {
+    if (!attempt || (attempt.studentId !== session.id && attempt.studentId !== session.identifier && attempt.studentId !== `student_${session.identifier}`)) {
       return NextResponse.json({ error: 'Attempt not found' }, { status: 404 });
     }
 
     // Log event in database
     const eventId = `evt_${attemptId}_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
-    await db.insert(examEvents).values({
-      id: eventId,
+    await db.collection<ExamEventDoc>(COLLECTIONS.examEvents).insertOne({
+      _id: eventId,
       attemptId,
       eventType,
       eventTimestamp: nowIso,
@@ -38,19 +37,27 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     });
 
     // Update event counters on attempt
+    const updateFields: any = {
+      lastSeenAt: nowIso,
+      updatedAt: nowIso,
+    };
+    const incFields: any = {};
+
     if (eventType === 'fullscreen_exited') {
-      await db.update(attempts).set({
-        fullscreenExitCount: sql`${attempts.fullscreenExitCount} + 1`,
-        lastSeenAt: nowIso,
-        updatedAt: nowIso,
-      }).where(eq(attempts.id, attemptId));
+      incFields.fullscreenExitCount = 1;
     } else if (eventType === 'tab_hidden') {
-      await db.update(attempts).set({
-        tabSwitchCount: sql`${attempts.tabSwitchCount} + 1`,
-        lastSeenAt: nowIso,
-        updatedAt: nowIso,
-      }).where(eq(attempts.id, attemptId));
+      incFields.tabSwitchCount = 1;
     }
+
+    const updateDoc: any = { $set: updateFields };
+    if (Object.keys(incFields).length > 0) {
+      updateDoc.$inc = incFields;
+    }
+
+    await db.collection<AttemptDoc>(COLLECTIONS.attempts).updateOne(
+      { _id: attemptId },
+      updateDoc
+    );
 
     return NextResponse.json({ success: true, eventLogged: eventType });
 

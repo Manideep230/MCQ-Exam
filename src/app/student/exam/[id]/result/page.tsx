@@ -93,7 +93,7 @@ function StudentResultContent() {
               {autoSubmitted ? 'EXAM AUTO-SUBMITTED' : 'EXAMINATION COMPLETED'}
             </span>
             <h1 className="text-2xl font-black text-white mt-1">{result?.examTitle}</h1>
-            <p className="text-xs text-slate-400 mt-1">Your answers have been securely recorded into SQLite database.</p>
+            <p className="text-xs text-slate-400 mt-1">Your answers have been securely recorded into the examination database.</p>
           </div>
 
           {result?.showResults ? (

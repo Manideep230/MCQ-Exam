@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
-import { db } from '@/db';
-import { students, exams, attempts, answers } from '@/db/schema';
-import { eq, sql } from 'drizzle-orm';
+import { getDb, COLLECTIONS } from '@/db';
+import { StudentDoc, ExamDoc, AttemptDoc, AnswerDoc } from '@/db/schema';
 
 export async function GET(req: NextRequest) {
   const session = await getAuthSession();
@@ -11,27 +10,22 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const studentList = await db.select({ id: students.id }).from(students);
-    const examList = await db.select().from(exams);
-    const attemptList = await db.select().from(attempts);
+    const db = await getDb();
+    const totalStudents = await db.collection<StudentDoc>(COLLECTIONS.students).countDocuments();
+    const examList = await db.collection<ExamDoc>(COLLECTIONS.exams).find({}).toArray();
+    const completedAttempts = await db.collection<AttemptDoc>(COLLECTIONS.attempts).find({ status: 'submitted' }).toArray();
 
-    const totalStudents = studentList.length;
     const totalExams = examList.length;
-
     const now = new Date();
     const scheduledExams = examList.filter(e => new Date(e.startAt) > now).length;
     const activeExams = examList.filter(e => new Date(e.startAt) <= now && new Date(e.endAt) > now).length;
-    const completedAttempts = attemptList.filter(a => a.status === 'submitted');
 
     // Calculate score statistics across all submitted attempts
     let totalScoreSum = 0;
     let highestScore = 0;
 
     for (const att of completedAttempts) {
-      const attAnswers = await db.select({ finalScore: answers.finalScore })
-        .from(answers)
-        .where(eq(answers.attemptId, att.id));
-      
+      const attAnswers = await db.collection<AnswerDoc>(COLLECTIONS.answers).find({ attemptId: att._id }).toArray();
       const score = attAnswers.reduce((sum, a) => sum + (a.finalScore || 0), 0);
       totalScoreSum += score;
       if (score > highestScore) {

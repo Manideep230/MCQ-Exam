@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthSession, signToken, setAuthCookie } from '@/lib/auth';
-import { db } from '@/db';
-import { students } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { getDb, COLLECTIONS } from '@/db';
+import { StudentDoc } from '@/db/schema';
 
 export async function POST(req: NextRequest) {
   const session = await getAuthSession();
@@ -17,13 +16,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Full Name, Branch, and College Name are required.' }, { status: 400 });
     }
 
-    await db.update(students).set({
-      fullName: fullName.trim(),
-      branch: branch.trim(),
-      collegeName: collegeName.trim(),
-      profileCompleted: true,
-      updatedAt: new Date().toISOString(),
-    }).where(eq(students.id, session.id));
+    const db = await getDb();
+    await db.collection<StudentDoc>(COLLECTIONS.students).updateOne(
+      { $or: [{ _id: session.id }, { rollNumber: session.identifier }] },
+      {
+        $set: {
+          fullName: fullName.trim(),
+          branch: branch.trim(),
+          collegeName: collegeName.trim(),
+          profileCompleted: true,
+          updatedAt: new Date().toISOString(),
+        }
+      }
+    );
 
     // Update JWT session cookie with profileCompleted = true
     const updatedToken = await signToken({

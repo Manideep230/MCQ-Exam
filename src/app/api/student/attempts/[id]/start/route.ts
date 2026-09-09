@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
-import { db } from '@/db';
-import { exams, questions, options, attempts, answers } from '@/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { getDb, COLLECTIONS } from '@/db';
+import { ExamDoc, QuestionDoc, AttemptDoc, AnswerDoc } from '@/db/schema';
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getAuthSession();
@@ -15,8 +14,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const nowIso = now.toISOString();
 
   try {
-    const examList = await db.select().from(exams).where(eq(exams.id, examId));
-    const exam = examList[0];
+    const db = await getDb();
+    const exam = await db.collection<ExamDoc>(COLLECTIONS.exams).findOne({ _id: examId });
 
     if (!exam) {
       return NextResponse.json({ error: 'Exam not found' }, { status: 404 });
@@ -38,11 +37,10 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     }
 
     // Check existing attempt
-    const existingAttempts = await db.select()
-      .from(attempts)
-      .where(and(eq(attempts.examId, examId), eq(attempts.studentId, session.id)));
-    
-    let attempt = existingAttempts[0];
+    let attempt = await db.collection<AttemptDoc>(COLLECTIONS.attempts).findOne({
+      examId: examId,
+      $or: [{ studentId: session.id }, { studentId: session.identifier }, { studentId: `student_${session.identifier}` }]
+    });
 
     if (attempt) {
       if (attempt.status === 'submitted') {
@@ -53,17 +51,18 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       const deadline = new Date(attempt.deadlineAt);
       if (now >= deadline || attempt.status === 'expired' || attempt.status === 'abandoned') {
         // Auto mark as submitted/expired
-        await db.update(attempts)
-          .set({ status: 'expired', submittedAt: attempt.deadlineAt })
-          .where(eq(attempts.id, attempt.id));
+        await db.collection<AttemptDoc>(COLLECTIONS.attempts).updateOne(
+          { _id: attempt._id },
+          { $set: { status: 'expired', submittedAt: attempt.deadlineAt, updatedAt: nowIso } }
+        );
         return NextResponse.json({ error: 'Exam time has expired.' }, { status: 400 });
       }
 
       // Update last_seen_at
-      await db.update(attempts)
-        .set({ lastSeenAt: nowIso, updatedAt: nowIso })
-        .where(eq(attempts.id, attempt.id));
-
+      await db.collection<AttemptDoc>(COLLECTIONS.attempts).updateOne(
+        { _id: attempt._id },
+        { $set: { lastSeenAt: nowIso, updatedAt: nowIso } }
+      );
     } else {
       // Calculate server deadline: min(now + duration, exam.endAt)
       const durationMs = exam.durationMinutes * 60 * 1000;
@@ -71,9 +70,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       const finalDeadline = calcDeadline < endAt ? calcDeadline : endAt;
 
       const attemptId = `attempt_${examId}_${session.id}_${Date.now()}`;
-
-      await db.insert(attempts).values({
-        id: attemptId,
+      const newAttempt: AttemptDoc = {
+        _id: attemptId,
         examId: examId,
         studentId: session.id,
         startedAt: nowIso,
@@ -82,43 +80,50 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         status: 'in_progress',
         fullscreenExitCount: 0,
         tabSwitchCount: 0,
-      });
+        createdAt: nowIso,
+        updatedAt: nowIso,
+      };
 
-      const newAttemptList = await db.select().from(attempts).where(eq(attempts.id, attemptId));
-      attempt = newAttemptList[0];
+      await db.collection<AttemptDoc>(COLLECTIONS.attempts).insertOne(newAttempt);
+      attempt = newAttempt;
     }
 
     // Fetch questions for this exam
-    const questionList = await db.select().from(questions)
-      .where(eq(questions.examId, examId))
-      .orderBy(questions.orderIndex);
-
-    // Fetch options for all questions
-    const questionIds = questionList.map(q => q.id);
-    const optionsList = await db.select().from(options);
+    const questionList = await db.collection<QuestionDoc>(COLLECTIONS.questions)
+      .find({ examId: examId })
+      .sort({ orderIndex: 1 })
+      .toArray();
 
     // Fetch saved answers for this attempt
-    const savedAnswers = await db.select().from(answers).where(eq(answers.attemptId, attempt.id));
+    const savedAnswers = await db.collection<AnswerDoc>(COLLECTIONS.answers)
+      .find({ attemptId: attempt._id })
+      .toArray();
+
     const answerMap = new Map(savedAnswers.map(a => [a.questionId, {
       selectedOption: a.selectedOption,
       justification: a.justification,
       answeredAt: a.answeredAt
     }]));
 
-    // CRITICAL SECURITY REQUIREMENT #43: Do NOT expose correctOption or AI score to student!
+    // CRITICAL SECURITY REQUIREMENT: Do NOT expose correctOption or AI score to student!
     const sanitizeQuestions = questionList.map(q => {
-      const qOptions = optionsList
-        .filter(o => o.questionId === q.id)
-        .map(o => ({
-          optionKey: o.optionKey,
-          optionText: o.optionText,
-        }))
-        .sort((a, b) => a.optionKey.localeCompare(b.optionKey));
+      let qOptions: { optionKey: string; optionText: string }[] = [];
+      if (q.options) {
+        if (Array.isArray(q.options)) {
+          qOptions = q.options;
+        } else {
+          qOptions = Object.entries(q.options).map(([key, text]) => ({
+            optionKey: key,
+            optionText: text as string,
+          }));
+        }
+      }
 
-      const existingAns = answerMap.get(q.id);
+      qOptions.sort((a, b) => a.optionKey.localeCompare(b.optionKey));
+      const existingAns = answerMap.get(q._id);
 
       return {
-        id: q.id,
+        id: q._id,
         questionText: q.questionText,
         marks: q.marks,
         orderIndex: q.orderIndex,
@@ -133,7 +138,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     return NextResponse.json({
       success: true,
       attempt: {
-        id: attempt.id,
+        id: attempt._id,
         startedAt: attempt.startedAt,
         deadlineAt: attempt.deadlineAt,
         lastSeenAt: attempt.lastSeenAt,
@@ -142,7 +147,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         tabSwitchCount: attempt.tabSwitchCount,
       },
       exam: {
-        id: exam.id,
+        id: exam._id,
         title: exam.title,
         description: exam.description,
         durationMinutes: exam.durationMinutes,

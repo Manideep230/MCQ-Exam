@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
-import { db } from '@/db';
-import { students, admins } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { getDb, COLLECTIONS } from '@/db';
+import { StudentDoc, AdminDoc } from '@/db/schema';
 
 export async function GET(req: NextRequest) {
   const session = await getAuthSession();
@@ -10,9 +9,13 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ authenticated: false, user: null }, { status: 401 });
   }
 
+  const db = await getDb();
+
   if (session.role === 'student') {
-    const studentList = await db.select().from(students).where(eq(students.id, session.id));
-    const student = studentList[0];
+    const student = await db.collection<StudentDoc>(COLLECTIONS.students).findOne({
+      $or: [{ _id: session.id }, { rollNumber: session.identifier }]
+    });
+
     if (!student) {
       return NextResponse.json({ authenticated: false, user: null }, { status: 401 });
     }
@@ -20,7 +23,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       authenticated: true,
       user: {
-        id: student.id,
+        id: student._id,
         role: 'student',
         rollNumber: student.rollNumber,
         fullName: student.fullName,
@@ -30,8 +33,10 @@ export async function GET(req: NextRequest) {
       },
     });
   } else {
-    const adminList = await db.select().from(admins).where(eq(admins.id, session.id));
-    const admin = adminList[0];
+    const admin = await db.collection<AdminDoc>(COLLECTIONS.admins).findOne({
+      $or: [{ _id: session.id }, { username: session.identifier }]
+    });
+
     if (!admin) {
       return NextResponse.json({ authenticated: false, user: null }, { status: 401 });
     }
@@ -39,7 +44,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       authenticated: true,
       user: {
-        id: admin.id,
+        id: admin._id,
         role: 'admin',
         username: admin.username,
       },

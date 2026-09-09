@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthSession } from '@/lib/auth';
-import { db } from '@/db';
-import { exams, questions, attempts } from '@/db/schema';
-import { eq, sql } from 'drizzle-orm';
+import { getDb, COLLECTIONS } from '@/db';
+import { ExamDoc, QuestionDoc, AttemptDoc } from '@/db/schema';
 
 export async function GET(req: NextRequest) {
   const session = await getAuthSession();
@@ -11,16 +10,30 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const examList = await db.select().from(exams).orderBy(exams.createdAt);
+    const db = await getDb();
+    const examList = await db.collection<ExamDoc>(COLLECTIONS.exams).find({}).sort({ createdAt: 1 }).toArray();
 
     const fullExams = await Promise.all(examList.map(async (exam) => {
-      const qList = await db.select({ id: questions.id }).from(questions).where(eq(questions.examId, exam.id));
-      const attList = await db.select({ id: attempts.id }).from(attempts).where(eq(attempts.examId, exam.id));
+      const qCount = await db.collection<QuestionDoc>(COLLECTIONS.questions).countDocuments({ examId: exam._id });
+      const attCount = await db.collection<AttemptDoc>(COLLECTIONS.attempts).countDocuments({ examId: exam._id });
 
       return {
-        ...exam,
-        questionCount: qList.length,
-        attemptCount: attList.length,
+        id: exam._id,
+        _id: exam._id,
+        title: exam.title,
+        description: exam.description,
+        durationMinutes: exam.durationMinutes,
+        startAt: exam.startAt,
+        endAt: exam.endAt,
+        totalMarks: exam.totalMarks,
+        status: exam.status,
+        showResults: exam.showResults,
+        allowBackNav: exam.allowBackNav,
+        abandonmentTimeoutSeconds: exam.abandonmentTimeoutSeconds,
+        createdAt: exam.createdAt,
+        updatedAt: exam.updatedAt,
+        questionCount: qCount,
+        attemptCount: attCount,
       };
     }));
 
@@ -57,9 +70,10 @@ export async function POST(req: NextRequest) {
 
     const examId = `exam_${Date.now()}`;
     const nowIso = new Date().toISOString();
+    const db = await getDb();
 
-    await db.insert(exams).values({
-      id: examId,
+    const newExam: ExamDoc = {
+      _id: examId,
       title: title.trim(),
       description: description?.trim() || '',
       durationMinutes: Number(durationMinutes),
@@ -72,7 +86,9 @@ export async function POST(req: NextRequest) {
       abandonmentTimeoutSeconds: Number(abandonmentTimeoutSeconds) || 60,
       createdAt: nowIso,
       updatedAt: nowIso,
-    });
+    };
+
+    await db.collection<ExamDoc>(COLLECTIONS.exams).insertOne(newExam);
 
     return NextResponse.json({
       success: true,
