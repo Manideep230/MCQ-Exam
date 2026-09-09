@@ -78,8 +78,6 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       .where(and(eq(answers.attemptId, attemptId), eq(answers.questionId, questionId)));
     const existingAns = existingAnsList[0];
 
-    const answerId = existingAns ? existingAns.id : `ans_${attemptId}_${questionId}`;
-
     if (existingAns) {
       await db.update(answers).set({
         selectedOption,
@@ -91,23 +89,39 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         aiReason: aiResult.reason,
         evaluationStatus: aiResult.evaluationStatus,
         updatedAt: nowIso,
-      }).where(eq(answers.id, answerId));
+      }).where(eq(answers.id, existingAns.id));
     } else {
-      await db.insert(answers).values({
-        id: answerId,
-        attemptId,
-        questionId,
-        selectedOption,
-        justification: justification.trim(),
-        aiOptionCorrect: aiResult.optionCorrect,
-        aiJustificationQuality: aiResult.justificationQuality,
-        aiJustificationScore: aiResult.justificationScore,
-        finalScore: aiResult.finalScore,
-        aiReason: aiResult.reason,
-        evaluationStatus: aiResult.evaluationStatus,
-        answeredAt: nowIso,
-        updatedAt: nowIso,
-      });
+      const answerId = `ans_${attemptId}_${questionId}`;
+      try {
+        await db.insert(answers).values({
+          id: answerId,
+          attemptId,
+          questionId,
+          selectedOption,
+          justification: justification.trim(),
+          aiOptionCorrect: aiResult.optionCorrect,
+          aiJustificationQuality: aiResult.justificationQuality,
+          aiJustificationScore: aiResult.justificationScore,
+          finalScore: aiResult.finalScore,
+          aiReason: aiResult.reason,
+          evaluationStatus: aiResult.evaluationStatus,
+          answeredAt: nowIso,
+          updatedAt: nowIso,
+        });
+      } catch (insertErr) {
+        // Fallback update if record was created concurrently
+        await db.update(answers).set({
+          selectedOption,
+          justification: justification.trim(),
+          aiOptionCorrect: aiResult.optionCorrect,
+          aiJustificationQuality: aiResult.justificationQuality,
+          aiJustificationScore: aiResult.justificationScore,
+          finalScore: aiResult.finalScore,
+          aiReason: aiResult.reason,
+          evaluationStatus: aiResult.evaluationStatus,
+          updatedAt: nowIso,
+        }).where(and(eq(answers.attemptId, attemptId), eq(answers.questionId, questionId)));
+      }
     }
 
     // Update last_seen_at in attempt
