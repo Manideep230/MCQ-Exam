@@ -77,6 +77,8 @@ export async function POST(req: NextRequest) {
     }
   } catch (error: any) {
     console.error('Login Error:', error);
-    return NextResponse.json({ error: 'An unexpected server error occurred during login.' }, { status: 500 });
+    return NextResponse.json({ 
+      error: error.message || 'An unexpected server error occurred during login.' 
+    }, { status: 500 });
   }
 }
