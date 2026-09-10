@@ -168,10 +168,17 @@ export default function ExamInstructionsPage() {
             </h3>
 
             <ul className="space-y-3 text-xs text-slate-300">
+              <li className="flex items-start space-x-3 bg-slate-950/40 p-3 rounded-xl border border-red-900/40">
+                <ShieldAlert className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-white">Strict 3-Alert Proctoring Limit:</strong> Exiting fullscreen, switching applications, minimizing the window, switching tabs, or hovering/moving your cursor outside the exam window counts as an alert. Upon reaching <strong className="text-red-400">3 alerts</strong>, your examination will be <strong className="text-red-400">automatically submitted immediately</strong>.
+                </div>
+              </li>
+
               <li className="flex items-start space-x-3 bg-slate-950/40 p-3 rounded-xl border border-slate-800/60">
                 <Maximize2 className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
                 <div>
-                  <strong className="text-white">Fullscreen Required:</strong> Upon clicking "Start Exam", your browser will enter Fullscreen mode. Exiting fullscreen mode during the exam will trigger anti-cheating audit warnings.
+                  <strong className="text-white">Fullscreen Required:</strong> Upon clicking "Start Exam", your browser will enter Fullscreen mode. Exiting fullscreen mode during the exam triggers a security alert.
                 </div>
               </li>
 

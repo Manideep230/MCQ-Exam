@@ -45,7 +45,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     if (eventType === 'fullscreen_exited') {
       incFields.fullscreenExitCount = 1;
-    } else if (eventType === 'tab_hidden') {
+    } else if (eventType === 'tab_hidden' || eventType === 'focus_lost' || eventType === 'app_switched' || eventType === 'cursor_left_window') {
       incFields.tabSwitchCount = 1;
     }
 

@@ -30,6 +30,7 @@ function StudentResultContent() {
   const searchParams = useSearchParams();
   const examId = params.id as string;
   const autoSubmitted = searchParams.get('autoSubmitted');
+  const reason = searchParams.get('reason');
 
   const [loading, setLoading] = useState(true);
   const [result, setResult] = useState<ResultData | null>(null);
@@ -84,16 +85,30 @@ function StudentResultContent() {
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl text-center space-y-6">
           
           {/* Success Badge */}
-          <div className="w-16 h-16 bg-emerald-950/80 border border-emerald-800 text-emerald-400 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-emerald-950">
+          <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto shadow-lg ${
+            reason === 'proctoring_alerts_exceeded'
+              ? 'bg-red-950/80 border border-red-800 text-red-400 shadow-red-950'
+              : 'bg-emerald-950/80 border border-emerald-800 text-emerald-400 shadow-emerald-950'
+          }`}>
             <CheckCircle2 className="w-9 h-9" />
           </div>
 
           <div>
-            <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-widest">
-              {autoSubmitted ? 'EXAMINATION AUTO-SUBMITTED' : 'EXAMINATION COMPLETED'}
+            <span className={`text-[11px] font-bold uppercase tracking-widest ${
+              reason === 'proctoring_alerts_exceeded' ? 'text-red-400' : 'text-emerald-400'
+            }`}>
+              {reason === 'proctoring_alerts_exceeded'
+                ? 'AUTO-SUBMITTED (3 PROCTORING ALERTS EXCEEDED)'
+                : autoSubmitted
+                ? 'EXAMINATION AUTO-SUBMITTED'
+                : 'EXAMINATION COMPLETED'}
             </span>
             <h1 className="text-2xl font-black text-white mt-1.5">{result?.examTitle}</h1>
-            <p className="text-xs text-slate-400 mt-1">Your responses have been recorded and evaluated.</p>
+            <p className="text-xs text-slate-400 mt-1">
+              {reason === 'proctoring_alerts_exceeded'
+                ? 'Your test was automatically submitted after reaching 3 proctoring alerts.'
+                : 'Your responses have been recorded and evaluated.'}
+            </p>
           </div>
 
           {/* Marks Display Card */}

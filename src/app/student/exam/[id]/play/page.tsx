@@ -57,10 +57,15 @@ export default function ExamPlayPage() {
   const [savingStatus, setSavingStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Proctoring Warnings
+  // Proctoring Warnings (3-Alert System)
   const [isFullscreen, setIsFullscreen] = useState(true);
   const [showWarningModal, setShowWarningModal] = useState(false);
   const [warningMessage, setWarningMessage] = useState('');
+  const [warningReason, setWarningReason] = useState('');
+  const [alertCount, setAlertCount] = useState<number>(0);
+  const alertCountRef = useRef<number>(0);
+  const lastAlertTimeRef = useRef<number>(0);
+  const isAutoSubmittingRef = useRef<boolean>(false);
 
   // Submit Modal
   const [showSubmitModal, setShowSubmitModal] = useState(false);
@@ -160,6 +165,37 @@ export default function ExamPlayPage() {
     };
   }, []);
 
+  // Register a proctoring violation alert (Max 3 Alerts Rule)
+  const registerViolationAlert = (eventType: string, reasonText: string) => {
+    if (isAutoSubmittingRef.current) return;
+
+    const now = Date.now();
+    // 1.5 second cooldown to avoid duplicate increments from simultaneous events (e.g. blur + visibilitychange + fullscreenchange)
+    if (now - lastAlertTimeRef.current < 1500) {
+      logEvent(eventType, { reason: reasonText, duplicateSuppressed: true });
+      return;
+    }
+
+    lastAlertTimeRef.current = now;
+    const newCount = alertCountRef.current + 1;
+    alertCountRef.current = newCount;
+    setAlertCount(newCount);
+    setWarningReason(reasonText);
+    setShowWarningModal(true);
+
+    logEvent(eventType, { alertCount: newCount, reason: reasonText });
+
+    if (newCount >= 3) {
+      isAutoSubmittingRef.current = true;
+      setWarningMessage(`CRITICAL PROCTORING VIOLATION: Maximum 3 alerts reached (${reasonText}). Examination is being automatically submitted now.`);
+      setTimeout(() => {
+        handleAutoSubmit('proctoring_alerts_exceeded');
+      }, 1500);
+    } else {
+      setWarningMessage(`WARNING: ${reasonText}. You have ${3 - newCount} warning(s) remaining before automatic test submission.`);
+    }
+  };
+
   // 4. Anti-Cheating Monitoring & Event Listeners
   useEffect(() => {
     if (!attempt) return;
@@ -169,26 +205,37 @@ export default function ExamPlayPage() {
       const isFS = !!document.fullscreenElement;
       setIsFullscreen(isFS);
       if (!isFS) {
-        setShowWarningModal(true);
-        setWarningMessage('WARNING: You have exited fullscreen mode. Please return to fullscreen mode immediately. Repeated violations will be audited.');
-        logEvent('fullscreen_exited');
+        registerViolationAlert('fullscreen_exited', 'Exited Fullscreen Mode');
       } else {
         logEvent('fullscreen_entered');
       }
     };
 
-    // Tab visibility change detection
+    // Tab visibility change detection (switching tabs or minimizing)
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        logEvent('tab_hidden');
+        registerViolationAlert('tab_hidden', 'Switched Tab / Window Hidden');
       } else {
         logEvent('tab_visible');
       }
     };
 
-    // Window focus loss
+    // Window focus loss (App switching / minimizing window)
     const handleBlur = () => {
-      logEvent('focus_lost');
+      registerViolationAlert('focus_lost', 'Switched Application / Window Focus Lost');
+    };
+
+    // Hovering outside app window / hovering external apps / moving mouse out of viewport
+    const handleMouseLeave = (e: MouseEvent) => {
+      if (e.clientY <= 0 || e.clientX <= 0 || e.clientX >= window.innerWidth || e.clientY >= window.innerHeight) {
+        registerViolationAlert('cursor_left_window', 'Cursor Left Examination Window / Hovered External App');
+      }
+    };
+
+    const handleMouseOut = (e: MouseEvent) => {
+      if (!e.relatedTarget && (e.clientY <= 0 || e.clientX <= 0 || e.clientX >= window.innerWidth || e.clientY >= window.innerHeight)) {
+        registerViolationAlert('cursor_left_window', 'Cursor Left Examination Window / Hovered External App');
+      }
     };
 
     // Prevent context menu (Right click)
@@ -219,6 +266,8 @@ export default function ExamPlayPage() {
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('blur', handleBlur);
+    document.addEventListener('mouseleave', handleMouseLeave);
+    document.addEventListener('mouseout', handleMouseOut);
     document.addEventListener('contextmenu', handleContextMenu);
     document.addEventListener('copy', handleCopyPaste);
     document.addEventListener('paste', handleCopyPaste);
@@ -229,6 +278,8 @@ export default function ExamPlayPage() {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('blur', handleBlur);
+      document.removeEventListener('mouseleave', handleMouseLeave);
+      document.removeEventListener('mouseout', handleMouseOut);
       document.removeEventListener('contextmenu', handleContextMenu);
       document.removeEventListener('copy', handleCopyPaste);
       document.removeEventListener('paste', handleCopyPaste);
@@ -450,6 +501,18 @@ export default function ExamPlayPage() {
               <span>{timeFormatted}</span>
             </div>
 
+            {/* Proctoring Warning Badge */}
+            <div className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border text-xs font-mono font-bold ${
+              alertCount === 0
+                ? 'bg-emerald-950/60 text-emerald-400 border-emerald-800'
+                : alertCount === 1
+                ? 'bg-amber-950/80 text-amber-400 border-amber-800'
+                : 'bg-red-950/90 text-red-400 border-red-800 animate-pulse'
+            }`}>
+              <ShieldAlert className="w-4 h-4" />
+              <span>Alerts: {alertCount} / 3</span>
+            </div>
+
             {/* Finish Exam Button */}
             <button
               onClick={handleManualSubmit}
@@ -610,26 +673,56 @@ export default function ExamPlayPage() {
 
       </main>
 
-      {/* Fullscreen Exit Warning Modal */}
+      {/* Fullscreen Exit & Proctoring Alert Modal */}
       {showWarningModal && (
         <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-slate-900 border-2 border-red-600 rounded-2xl p-6 sm:p-8 max-w-md w-full text-center space-y-5 shadow-2xl animate-bounce-short">
-            <div className="w-14 h-14 bg-red-950 rounded-2xl border border-red-800 flex items-center justify-center mx-auto text-red-500">
-              <ShieldAlert className="w-8 h-8" />
+          <div className="bg-slate-900 border-2 border-red-600 rounded-2xl p-6 sm:p-8 max-w-md w-full text-center space-y-5 shadow-2xl">
+            <div className="w-16 h-16 bg-red-950 rounded-2xl border border-red-800 flex items-center justify-center mx-auto text-red-500 animate-pulse">
+              <ShieldAlert className="w-9 h-9" />
             </div>
             
-            <h3 className="text-xl font-extrabold text-white">PROCTORING WARNING</h3>
-            <p className="text-xs text-red-300 leading-relaxed font-medium">
-              You have exited fullscreen mode! This action has been recorded in the security audit log. Please return to fullscreen immediately.
-            </p>
+            <div>
+              <span className="px-3 py-1 rounded-full bg-red-950 text-red-400 border border-red-800 text-[11px] font-mono font-bold uppercase tracking-wider">
+                {alertCount >= 3 ? 'FINAL VIOLATION (3/3)' : `PROCTORING ALERT (${alertCount}/3)`}
+              </span>
+              <h3 className="text-xl font-extrabold text-white mt-2">
+                {alertCount >= 3 ? 'EXAM AUTO-SUBMITTING' : 'SECURITY ALERT DETECTED'}
+              </h3>
+            </div>
 
-            <button
-              onClick={reEnterFullscreen}
-              className="w-full py-3.5 px-4 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-red-600/40 flex items-center justify-center space-x-2 transition-all"
-            >
-              <Maximize className="w-4 h-4" />
-              <span>RETURN TO FULLSCREEN MODE</span>
-            </button>
+            {/* Alert Progress Stepper */}
+            <div className="flex items-center justify-center space-x-2 py-1">
+              {[1, 2, 3].map((step) => (
+                <div
+                  key={step}
+                  className={`h-2.5 flex-1 rounded-full transition-all ${
+                    step <= alertCount
+                      ? 'bg-red-500 shadow-md shadow-red-500/50'
+                      : 'bg-slate-800'
+                  }`}
+                />
+              ))}
+            </div>
+            
+            <div className="p-3.5 rounded-xl bg-slate-950 border border-red-900/50 text-xs text-red-300 font-medium leading-relaxed text-left space-y-1">
+              <p className="font-bold text-white uppercase text-[10px] tracking-wider text-red-400">Violation Reason:</p>
+              <p className="font-semibold text-slate-200">{warningReason || 'Proctoring Violation'}</p>
+              <p className="text-slate-400 text-[11px] pt-1">{warningMessage}</p>
+            </div>
+
+            {alertCount >= 3 ? (
+              <div className="py-3.5 px-4 rounded-xl bg-red-950 border border-red-800 text-red-400 font-bold text-xs uppercase tracking-wider flex items-center justify-center space-x-2 animate-pulse">
+                <span>Auto-submitting examination...</span>
+              </div>
+            ) : (
+              <button
+                onClick={reEnterFullscreen}
+                className="w-full py-3.5 px-4 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-red-600/40 flex items-center justify-center space-x-2 transition-all"
+              >
+                <Maximize className="w-4 h-4" />
+                <span>I UNDERSTAND & RETURN TO EXAM</span>
+              </button>
+            )}
           </div>
         </div>
       )}

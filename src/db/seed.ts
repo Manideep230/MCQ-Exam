@@ -208,6 +208,158 @@ const MONGODB_QUESTIONS = [
     text: "A teacher wants to find CSE students, display only their names and marks, arrange them from highest marks to lowest, and display only the first 10 students. Which combination of concepts is most appropriate?",
     options: { A: "Find + Projection + Sort + Limit", B: "Insert + Delete + Update", C: "Delete Many + Insert Many", D: "Update One + Delete One" },
     correct: "A"
+  },
+
+  // --- Questions 31 to 60 (Added from 30 Additional MCQ Question Bank) ---
+  {
+    text: "A developer has collected a new product's details and wants to add them as a new document to an existing `products` collection. The product does not currently exist. What should the developer do?",
+    options: { A: "Retrieve the document", B: "Insert the new document", C: "Sort the collection", D: "Delete the collection" },
+    correct: "B"
+  },
+  {
+    text: "A school receives the following information for a newly admitted student:\nRoll No: 24CSE015\nName: Anil\nBranch: CSE\nThere is no existing document for this student. Which operation best represents the required database action?",
+    options: { A: "Update", B: "Insert", C: "Delete", D: "Projection" },
+    correct: "B"
+  },
+  {
+    text: "An application receives information about exactly one new customer. The developer wants to create a single new document without affecting existing customers. Which operation is appropriate?",
+    options: { A: "Insert one", B: "Insert many", C: "Delete many", D: "Update many" },
+    correct: "A"
+  },
+  {
+    text: "A library registers one newly arrived book:\nTitle: Database Systems\nAuthor: Kiran\nAvailable: Yes\nWhich operation should be used to add this single book as a new document?",
+    options: { A: "Update one", B: "Insert one", C: "Delete one", D: "Insert many" },
+    correct: "B"
+  },
+  {
+    text: "A company imports employee information for 200 new employees from a file. All records need to be added to the `employees` collection. Which operation is most appropriate?",
+    options: { A: "Insert one repeatedly as the preferred operation", B: "Insert many", C: "Update one", D: "Delete many" },
+    correct: "B"
+  },
+  {
+    text: "An online shopping application receives 25 new orders at the same time. None of these orders currently exists in the database. Which operation best fits the situation?",
+    options: { A: "Delete many", B: "Update many", C: "Insert many", D: "Find" },
+    correct: "C"
+  },
+  {
+    text: "A MongoDB server is used by three different applications. An administrator wants to identify the databases available on the server before selecting one. Which operation is required?",
+    options: { A: "Display available databases", B: "Display documents", C: "Update documents", D: "Delete documents" },
+    correct: "A"
+  },
+  {
+    text: "A developer is unsure whether a particular database exists on the MongoDB server. What is the most appropriate first step?",
+    options: { A: "View the available databases", B: "Delete the suspected database", C: "Sort all documents", D: "Update all collections" },
+    correct: "A"
+  },
+  {
+    text: "A developer has selected the `company` database and wants to know whether it contains collections for `employees`, `departments`, and `projects`. What should the developer inspect?",
+    options: { A: "Available databases", B: "Available collections", C: "Individual documents only", D: "Index values" },
+    correct: "B"
+  },
+  {
+    text: "An administrator has opened a database but does not know the names of the collections inside it. Which operation would provide this information?",
+    options: { A: "Show collections", B: "Show databases", C: "Delete many", D: "Update one" },
+    correct: "A"
+  },
+  {
+    text: "A university stores thousands of student documents. The administrator wants to retrieve only students whose branch is `CSE`. Which operation is conceptually required?",
+    options: { A: "Insert", B: "Find/query", C: "Delete", D: "Update" },
+    correct: "B"
+  },
+  {
+    text: "A customer wants to see their order history from an online shopping application. The orders already exist in MongoDB. What operation should the application perform?",
+    options: { A: "Insert new orders", B: "Find the relevant order documents", C: "Delete old orders", D: "Update every order" },
+    correct: "B"
+  },
+  {
+    text: "A teacher wants to locate all students who scored more than 80 marks. The student records already exist. What should the application perform?",
+    options: { A: "A query to retrieve matching documents", B: "An insertion operation", C: "A deletion operation", D: "An update operation on every document" },
+    correct: "A"
+  },
+  {
+    text: "A customer accidentally created a duplicate account. The administrator has identified the exact duplicate document and wants to remove only that record. What is appropriate?",
+    options: { A: "Delete one", B: "Delete many", C: "Update many", D: "Insert many" },
+    correct: "A"
+  },
+  {
+    text: "A library database contains a book that has been entered incorrectly. The administrator wants to remove that particular document while keeping all other books. Which operation is suitable?",
+    options: { A: "Delete many", B: "Delete one", C: "Update many", D: "Insert one" },
+    correct: "B"
+  },
+  {
+    text: "An organization wants to remove all temporary employee records whose employment status is `Temporary`. Hundreds of documents may match the condition. Which operation is appropriate?",
+    options: { A: "Delete one", B: "Delete many", C: "Update one", D: "Find one" },
+    correct: "B"
+  },
+  {
+    text: "An e-commerce company wants to remove all products that are marked as discontinued. There may be thousands of such products. What is the most suitable operation?",
+    options: { A: "Delete one", B: "Delete many", C: "Insert many", D: "Update one" },
+    correct: "B"
+  },
+  {
+    text: "A news website retrieves thousands of articles but wants to display only the first 10 articles on the current page. Which concept should be used?",
+    options: { A: "Projection", B: "Limit", C: "Delete", D: "Update" },
+    correct: "B"
+  },
+  {
+    text: "A mobile application searches for restaurants but wants to show only 5 results initially to keep the screen simple. Which MongoDB concept is appropriate?",
+    options: { A: "Limit the number of returned documents", B: "Delete the extra documents", C: "Update the extra documents", D: "Project the extra documents" },
+    correct: "A"
+  },
+  {
+    text: "A college database contains 5,000 student records. An administrator wants to retrieve only 20 matching records for the first page of a report. What should be applied to the query result?",
+    options: { A: "Limit", B: "Delete", C: "Update", D: "Insert" },
+    correct: "A"
+  },
+  {
+    text: "A student document contains:\nName\nRoll Number\nBranch\nPhone\nAddress\nDate of Birth\nA public student directory should display only the student's name and branch. Which concept should be used?",
+    options: { A: "Projection", B: "Sort", C: "Delete many", D: "Insert many" },
+    correct: "A"
+  },
+  {
+    text: "A company stores confidential employee information along with general employee details. A dashboard should display only the employee's name and department. What is the best approach?",
+    options: { A: "Return only the required fields", B: "Delete confidential fields from the database", C: "Delete the employee documents", D: "Create duplicate employee documents" },
+    correct: "A"
+  },
+  {
+    text: "A hospital application stores complete patient records, but a waiting-room display should show only:\nPatient Name\nToken Number\nWhich MongoDB concept is most suitable?",
+    options: { A: "Projection", B: "Limit", C: "Sort", D: "Update many" },
+    correct: "A"
+  },
+  {
+    text: "An online store wants customers to see the cheapest products first. The products are already stored in MongoDB. Which concept should be applied to the results?",
+    options: { A: "Sort", B: "Projection", C: "Delete", D: "Insert" },
+    correct: "A"
+  },
+  {
+    text: "A teacher wants to generate a report in which students appear from the highest marks to the lowest marks. Which operation is required?",
+    options: { A: "Limit", B: "Sort", C: "Projection", D: "Delete one" },
+    correct: "B"
+  },
+  {
+    text: "A company wants its employee list arranged alphabetically by employee name. Which database operation is appropriate?",
+    options: { A: "Sort", B: "Insert many", C: "Delete many", D: "Update one" },
+    correct: "A"
+  },
+  {
+    text: "A student's phone number has changed. The student's existing document should be modified, while all other student documents remain unchanged. Which operation is appropriate?",
+    options: { A: "Insert one", B: "Update one", C: "Update many", D: "Delete many" },
+    correct: "B"
+  },
+  {
+    text: "An online store discovers that one product has an incorrect price. Only that product's price needs to be changed. Which operation should be used?",
+    options: { A: "Update one", B: "Update many", C: "Insert many", D: "Delete many" },
+    correct: "A"
+  },
+  {
+    text: "A university changes the name of a branch, and all existing student documents containing the old branch name need to be changed. Which operation is appropriate?",
+    options: { A: "Update one", B: "Update many", C: "Delete one", D: "Insert one" },
+    correct: "B"
+  },
+  {
+    text: "An online store wants to mark all products in a particular category as \"Out of Stock\" because the warehouse has run out of them. Multiple product documents need to be modified. Which operation is most suitable?",
+    options: { A: "Update one", B: "Update many", C: "Delete one", D: "Insert many" },
+    correct: "B"
   }
 ];
 
@@ -272,56 +424,64 @@ async function seed() {
     }
   }
 
-  // 3. Seed MongoDB Basics Exam
+  // 3. Seed MongoDB Basics Exam (60 Questions, 60 Minutes)
   const examsCol = db.collection<ExamDoc>('exams');
   const questionsCol = db.collection<QuestionDoc>('questions');
   const examId = 'exam_mongodb_basics_1';
 
-  const existingExam = await examsCol.findOne({ _id: examId } as any);
-
   const now = new Date();
   const startDate = new Date(now.getTime() - 1000 * 60 * 30); // Started 30 mins ago
-  const endDate = new Date(now.getTime() + 1000 * 60 * 60 * 24 * 7); // Active for 7 days
+  const endDate = new Date(now.getTime() + 1000 * 60 * 60 * 24 * 30); // Active for 30 days
 
-  if (!existingExam) {
-    await examsCol.insertOne({
-      _id: examId,
-      title: 'MongoDB Basics',
-      description: 'Comprehensive evaluation of MongoDB core concepts including CRUD operations, sorting, projections, and limit clauses.',
-      durationMinutes: 60,
-      startAt: startDate.toISOString(),
-      endAt: endDate.toISOString(),
-      totalMarks: 30,
-      status: 'active',
-      showResults: true,
-      allowBackNav: true,
-      abandonmentTimeoutSeconds: 60,
-      createdAt: now.toISOString(),
-      updatedAt: now.toISOString(),
-    });
-    console.log('✅ Exam created: "MongoDB Basics"');
-
-    // 4. Seed Questions (with embedded options)
-    for (let i = 0; i < MONGODB_QUESTIONS.length; i++) {
-      const q = MONGODB_QUESTIONS[i];
-      const questionId = `q_mongo_${i + 1}`;
-
-      await questionsCol.insertOne({
-        _id: questionId,
-        examId: examId,
-        questionText: q.text,
-        marks: 1,
-        correctOption: q.correct as 'A' | 'B' | 'C' | 'D',
-        orderIndex: i + 1,
-        options: q.options,
-        createdAt: now.toISOString(),
+  await examsCol.updateOne(
+    { _id: examId },
+    {
+      $set: {
+        title: 'MongoDB Basics',
+        description: 'Comprehensive evaluation of MongoDB core concepts including CRUD operations, sorting, projections, and limit clauses.',
+        durationMinutes: 60,
+        startAt: startDate.toISOString(),
+        endAt: endDate.toISOString(),
+        totalMarks: MONGODB_QUESTIONS.length,
+        status: 'active',
+        showResults: true,
+        allowBackNav: true,
+        abandonmentTimeoutSeconds: 60,
         updatedAt: now.toISOString(),
-      });
-    }
-    console.log(`✅ Seeded ${MONGODB_QUESTIONS.length} MongoDB Questions with embedded options.`);
-  } else {
-    console.log('ℹ️ Exam "MongoDB Basics" already exists. Skipping.');
+      },
+      $setOnInsert: {
+        createdAt: now.toISOString(),
+      }
+    },
+    { upsert: true }
+  );
+  console.log(`✅ Exam updated/upserted: "MongoDB Basics" (${MONGODB_QUESTIONS.length} Questions, 60 Minutes)`);
+
+  // 4. Upsert Questions (with embedded options)
+  for (let i = 0; i < MONGODB_QUESTIONS.length; i++) {
+    const q = MONGODB_QUESTIONS[i];
+    const questionId = `q_mongo_${i + 1}`;
+
+    await questionsCol.updateOne(
+      { _id: questionId },
+      {
+        $set: {
+          examId: examId,
+          questionText: q.text,
+          marks: 1,
+          correctOption: q.correct as 'A' | 'B' | 'C' | 'D',
+          orderIndex: i + 1,
+          options: q.options,
+          updatedAt: now.toISOString(),
+        },
+        $setOnInsert: {
+          createdAt: now.toISOString(),
+        }
+      },
+      { upsert: true }
+    );
   }
+  console.log(`✅ Seeded/Upserted ${MONGODB_QUESTIONS.length} MongoDB Questions with embedded options.`);
 
   // 5. Create indexes for performance
   await studentsCol.createIndex({ rollNumber: 1 }, { unique: true });
