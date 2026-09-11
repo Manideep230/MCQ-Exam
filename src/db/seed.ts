@@ -1,6 +1,7 @@
 import { MongoClient } from 'mongodb';
 import bcrypt from 'bcryptjs';
 import { AdminDoc, StudentDoc, ExamDoc, QuestionDoc } from './schema';
+import { PYTHON_BASICS_QUESTIONS } from './pythonBasicsQuestions';
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://manideepjuvvala215_db_user:o8qBudNZ3l42K3qU@cluster0.en0rmfg.mongodb.net/';
 const DB_NAME = process.env.MONGODB_DB_NAME || 'mcq_exam_portal';
@@ -469,7 +470,7 @@ async function seed() {
           examId: examId,
           questionText: q.text,
           marks: 1,
-          correctOption: q.correct as 'A' | 'B' | 'C' | 'D',
+          correctOption: q.correct,
           orderIndex: i + 1,
           options: q.options,
           updatedAt: now.toISOString(),
@@ -482,6 +483,56 @@ async function seed() {
     );
   }
   console.log(`✅ Seeded/Upserted ${MONGODB_QUESTIONS.length} MongoDB Questions with embedded options.`);
+
+  // 4b. Seed Python Basics 90 MCQs Exam
+  const pyExamId = 'exam_python_basics_90';
+  await examsCol.updateOne(
+    { _id: pyExamId },
+    {
+      $set: {
+        title: 'PYTHON BASICS — 90 MCQs',
+        description: 'Comprehensive Python Basics MCQ exam covering Comments, Input, Data Types, Arithmetic/Comparison/Logical/Assignment Operators, Precedence, type(), Strings, Slicing, and Exceptions.',
+        durationMinutes: 90,
+        startAt: startDate.toISOString(),
+        endAt: endDate.toISOString(),
+        totalMarks: PYTHON_BASICS_QUESTIONS.length,
+        status: 'active',
+        showResults: true,
+        allowBackNav: true,
+        abandonmentTimeoutSeconds: 60,
+        updatedAt: now.toISOString(),
+      },
+      $setOnInsert: {
+        createdAt: now.toISOString(),
+      }
+    },
+    { upsert: true }
+  );
+
+  for (let i = 0; i < PYTHON_BASICS_QUESTIONS.length; i++) {
+    const q = PYTHON_BASICS_QUESTIONS[i];
+    const questionId = `q_py90_${i + 1}`;
+
+    await questionsCol.updateOne(
+      { _id: questionId },
+      {
+        $set: {
+          examId: pyExamId,
+          questionText: q.questionText,
+          marks: 1,
+          correctOption: q.correctOption,
+          orderIndex: i + 1,
+          options: q.options,
+          updatedAt: now.toISOString(),
+        },
+        $setOnInsert: {
+          createdAt: now.toISOString(),
+        }
+      },
+      { upsert: true }
+    );
+  }
+  console.log(`✅ Seeded/Upserted ${PYTHON_BASICS_QUESTIONS.length} Python Basics Questions with 8 options each.`);
 
   // 5. Create indexes for performance
   await studentsCol.createIndex({ rollNumber: 1 }, { unique: true });

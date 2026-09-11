@@ -25,18 +25,14 @@ export async function GET(req: NextRequest) {
     const examMap = new Map(examList.map(e => [e._id, e.title]));
 
     const fullQuestions = qList.map(q => {
-      let optA = '', optB = '', optC = '', optD = '';
+      let optionsRecord: Record<string, string> = {};
       if (q.options) {
         if (Array.isArray(q.options)) {
-          optA = (q.options as any[]).find((o: any) => o.optionKey === 'A')?.optionText || '';
-          optB = (q.options as any[]).find((o: any) => o.optionKey === 'B')?.optionText || '';
-          optC = (q.options as any[]).find((o: any) => o.optionKey === 'C')?.optionText || '';
-          optD = (q.options as any[]).find((o: any) => o.optionKey === 'D')?.optionText || '';
+          q.options.forEach((o: any) => {
+            if (o && o.optionKey) optionsRecord[o.optionKey] = o.optionText || '';
+          });
         } else {
-          optA = (q.options as any).A || '';
-          optB = (q.options as any).B || '';
-          optC = (q.options as any).C || '';
-          optD = (q.options as any).D || '';
+          optionsRecord = q.options as Record<string, string>;
         }
       }
 
@@ -49,12 +45,7 @@ export async function GET(req: NextRequest) {
         marks: q.marks,
         correctOption: q.correctOption,
         orderIndex: q.orderIndex,
-        options: {
-          A: optA,
-          B: optB,
-          C: optC,
-          D: optD,
-        }
+        options: optionsRecord
       };
     });
 

@@ -21,6 +21,10 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       return NextResponse.json({ error: 'Exam not found' }, { status: 404 });
     }
 
+    if (exam.status === 'disabled') {
+      return NextResponse.json({ error: 'This examination is currently disabled by the administrator.' }, { status: 400 });
+    }
+
     const startAt = new Date(exam.startAt);
     const endAt = new Date(exam.endAt);
 
@@ -42,6 +46,20 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       $or: [{ studentId: session.id }, { studentId: session.identifier }, { studentId: `student_${session.identifier}` }]
     });
 
+    // Fetch all questions for this exam
+    const rawQuestions = await db.collection<QuestionDoc>(COLLECTIONS.questions)
+      .find({ examId: examId })
+      .toArray();
+
+    function shuffleArray<T>(array: T[]): T[] {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
     if (attempt) {
       if (attempt.status === 'submitted') {
         return NextResponse.json({ error: 'You have already completed this examination.' }, { status: 400 });
@@ -58,11 +76,21 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         return NextResponse.json({ error: 'Exam time has expired.' }, { status: 400 });
       }
 
-      // Update last_seen_at
-      await db.collection<AttemptDoc>(COLLECTIONS.attempts).updateOne(
-        { _id: attempt._id },
-        { $set: { lastSeenAt: nowIso, updatedAt: nowIso } }
-      );
+      // Ensure questionOrder is set for existing attempt
+      if (!attempt.questionOrder || attempt.questionOrder.length === 0) {
+        const shuffledIds = shuffleArray(rawQuestions.map(q => q._id));
+        attempt.questionOrder = shuffledIds;
+        await db.collection<AttemptDoc>(COLLECTIONS.attempts).updateOne(
+          { _id: attempt._id },
+          { $set: { questionOrder: shuffledIds, lastSeenAt: nowIso, updatedAt: nowIso } }
+        );
+      } else {
+        // Update last_seen_at
+        await db.collection<AttemptDoc>(COLLECTIONS.attempts).updateOne(
+          { _id: attempt._id },
+          { $set: { lastSeenAt: nowIso, updatedAt: nowIso } }
+        );
+      }
     } else {
       // Calculate server deadline: min(now + duration, exam.endAt)
       const durationMs = exam.durationMinutes * 60 * 1000;
@@ -70,6 +98,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       const finalDeadline = calcDeadline < endAt ? calcDeadline : endAt;
 
       const attemptId = `attempt_${examId}_${session.id}_${Date.now()}`;
+      const shuffledIds = shuffleArray(rawQuestions.map(q => q._id));
+
       const newAttempt: AttemptDoc = {
         _id: attemptId,
         examId: examId,
@@ -80,6 +110,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         status: 'in_progress',
         fullscreenExitCount: 0,
         tabSwitchCount: 0,
+        questionOrder: shuffledIds,
         createdAt: nowIso,
         updatedAt: nowIso,
       };
@@ -88,11 +119,13 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       attempt = newAttempt;
     }
 
-    // Fetch questions for this exam
-    const questionList = await db.collection<QuestionDoc>(COLLECTIONS.questions)
-      .find({ examId: examId })
-      .sort({ orderIndex: 1 })
-      .toArray();
+    // Sort questions according to attempt.questionOrder
+    const orderMap = new Map((attempt.questionOrder || []).map((id, index) => [id, index]));
+    const questionList = rawQuestions.sort((a, b) => {
+      const idxA = orderMap.has(a._id) ? orderMap.get(a._id)! : a.orderIndex;
+      const idxB = orderMap.has(b._id) ? orderMap.get(b._id)! : b.orderIndex;
+      return idxA - idxB;
+    });
 
     // Fetch saved answers for this attempt
     const savedAnswers = await db.collection<AnswerDoc>(COLLECTIONS.answers)
@@ -106,7 +139,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     }]));
 
     // CRITICAL SECURITY REQUIREMENT: Do NOT expose correctOption or AI score to student!
-    const sanitizeQuestions = questionList.map(q => {
+    const sanitizeQuestions = questionList.map((q, displayIdx) => {
       let qOptions: { optionKey: string; optionText: string }[] = [];
       if (q.options) {
         if (Array.isArray(q.options)) {
@@ -126,7 +159,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         id: q._id,
         questionText: q.questionText,
         marks: q.marks,
-        orderIndex: q.orderIndex,
+        orderIndex: displayIdx + 1,
         options: qOptions,
         savedAnswer: existingAns ? {
           selectedOption: existingAns.selectedOption,

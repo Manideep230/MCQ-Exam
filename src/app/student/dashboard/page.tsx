@@ -21,7 +21,7 @@ interface ExamItem {
   questionCount: number;
   startAt: string;
   endAt: string;
-  status: 'Upcoming' | 'Available' | 'Completed' | 'Expired';
+  status: 'Upcoming' | 'Available' | 'Completed' | 'Expired' | 'Disabled';
   attempt: {
     id: string;
     status: string;
@@ -235,6 +235,7 @@ function ExamCard({ exam, onStart, onResult }: { exam: ExamItem; onStart?: () =>
             exam.status === 'Available' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' :
             exam.status === 'Upcoming' ? 'bg-amber-950 text-amber-400 border border-amber-800' :
             exam.status === 'Completed' ? 'bg-blue-950 text-blue-400 border border-blue-800' :
+            exam.status === 'Disabled' ? 'bg-red-950 text-red-400 border border-red-800' :
             'bg-slate-800 text-slate-400'
           }`}>
             {exam.status}

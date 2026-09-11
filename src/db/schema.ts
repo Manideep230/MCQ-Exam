@@ -28,7 +28,7 @@ export interface ExamDoc {
   startAt: string;
   endAt: string;
   totalMarks: number;
-  status: 'draft' | 'scheduled' | 'active' | 'completed';
+  status: 'draft' | 'scheduled' | 'active' | 'completed' | 'disabled';
   showResults: boolean;
   allowBackNav: boolean;
   abandonmentTimeoutSeconds: number;
@@ -41,14 +41,9 @@ export interface QuestionDoc {
   examId: string;
   questionText: string;
   marks: number;
-  correctOption: 'A' | 'B' | 'C' | 'D';
+  correctOption: string;
   orderIndex: number;
-  options: {
-    A: string;
-    B: string;
-    C: string;
-    D: string;
-  };
+  options: Record<string, string> | Array<{ optionKey: string; optionText: string }>;
   createdAt: string;
   updatedAt: string;
 }
@@ -64,6 +59,7 @@ export interface AttemptDoc {
   status: 'in_progress' | 'submitted' | 'abandoned' | 'expired';
   fullscreenExitCount: number;
   tabSwitchCount: number;
+  questionOrder?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -72,7 +68,7 @@ export interface AnswerDoc {
   _id: string;
   attemptId: string;
   questionId: string;
-  selectedOption: 'A' | 'B' | 'C' | 'D';
+  selectedOption: string;
   justification: string;
   aiOptionCorrect?: boolean | null;
   aiJustificationQuality?: string | null;

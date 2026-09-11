@@ -30,10 +30,10 @@ interface AnswerSheetData {
     questionId: string;
     questionText: string;
     marks: number;
-    correctOption: 'A' | 'B' | 'C' | 'D';
-    options: Array<{ optionKey: 'A' | 'B' | 'C' | 'D'; optionText: string }>;
+    correctOption: string;
+    options: Array<{ optionKey: string; optionText: string }>;
     studentAnswer: {
-      selectedOption: 'A' | 'B' | 'C' | 'D';
+      selectedOption: string;
       justification: string;
       aiOptionCorrect: boolean;
       aiJustificationQuality: string;

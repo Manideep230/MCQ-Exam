@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { Clock, ShieldAlert, CheckCircle, ChevronLeft, ChevronRight, Save, Send, AlertOctagon, Wifi, WifiOff, Maximize, AlertCircle } from 'lucide-react';
 
 interface QuestionOption {
-  optionKey: 'A' | 'B' | 'C' | 'D';
+  optionKey: string;
   optionText: string;
 }
 
@@ -16,7 +16,7 @@ interface QuestionItem {
   orderIndex: number;
   options: QuestionOption[];
   savedAnswer: {
-    selectedOption: 'A' | 'B' | 'C' | 'D';
+    selectedOption: string;
     justification?: string;
   } | null;
 }
@@ -49,7 +49,7 @@ export default function ExamPlayPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // Local answer state map: questionId -> { selectedOption, saved }
-  const [answersMap, setAnswersMap] = useState<Record<string, { selectedOption: 'A' | 'B' | 'C' | 'D' | null; saved: boolean }>>({});
+  const [answersMap, setAnswersMap] = useState<Record<string, { selectedOption: string | null; saved: boolean }>>({});
   
   // Timer & Status
   const [remainingSeconds, setRemainingSeconds] = useState<number>(0);
@@ -89,7 +89,7 @@ export default function ExamPlayPage() {
       setQuestions(data.questions);
 
       // Populate initial answers map
-      const initialMap: Record<string, { selectedOption: 'A' | 'B' | 'C' | 'D' | null; saved: boolean }> = {};
+      const initialMap: Record<string, { selectedOption: string | null; saved: boolean }> = {};
       data.questions.forEach((q: QuestionItem) => {
         initialMap[q.id] = {
           selectedOption: q.savedAnswer?.selectedOption || null,
@@ -316,7 +316,7 @@ export default function ExamPlayPage() {
   const currentQuestion = questions[currentIndex];
   const currentAnswer = currentQuestion ? answersMap[currentQuestion.id] : null;
 
-  const handleOptionSelect = (optionKey: 'A' | 'B' | 'C' | 'D') => {
+  const handleOptionSelect = (optionKey: string) => {
     if (!currentQuestion) return;
     setAnswersMap(prev => ({
       ...prev,
@@ -325,16 +325,12 @@ export default function ExamPlayPage() {
         saved: false,
       }
     }));
+    // Instant auto-save to server on option click
+    saveSingleAnswerToServer(currentQuestion.id, optionKey);
   };
 
-  const saveCurrentAnswer = async (): Promise<boolean> => {
-    if (!currentQuestion || !currentAnswer || !attempt) return false;
-
-    if (!currentAnswer.selectedOption) {
-      setErrorMsg('Please select an option before proceeding.');
-      return false;
-    }
-
+  const saveSingleAnswerToServer = async (questionId: string, optionKey: string): Promise<boolean> => {
+    if (!attempt) return false;
     setErrorMsg(null);
     setSavingStatus('saving');
 
@@ -343,8 +339,8 @@ export default function ExamPlayPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          questionId: currentQuestion.id,
-          selectedOption: currentAnswer.selectedOption,
+          questionId,
+          selectedOption: optionKey,
         }),
       });
 
@@ -355,8 +351,8 @@ export default function ExamPlayPage() {
 
       setAnswersMap(prev => ({
         ...prev,
-        [currentQuestion.id]: {
-          ...prev[currentQuestion.id],
+        [questionId]: {
+          selectedOption: optionKey,
           saved: true,
         }
       }));
@@ -371,18 +367,38 @@ export default function ExamPlayPage() {
     }
   };
 
+  const saveCurrentAnswer = async (): Promise<boolean> => {
+    if (!currentQuestion || !currentAnswer || !attempt) return false;
+    if (!currentAnswer.selectedOption) {
+      setErrorMsg('Please select an option before proceeding.');
+      return false;
+    }
+    return await saveSingleAnswerToServer(currentQuestion.id, currentAnswer.selectedOption);
+  };
+
+  const flushAllUnsavedAnswers = async () => {
+    if (!attempt) return;
+    const entries = Object.entries(answersMap);
+    for (const [qId, val] of entries) {
+      if (val.selectedOption && !val.saved) {
+        await saveSingleAnswerToServer(qId, val.selectedOption);
+      }
+    }
+  };
+
   const handleNext = async () => {
     if (currentAnswer?.selectedOption && !currentAnswer.saved) {
-      const success = await saveCurrentAnswer();
-      if (success && currentIndex < questions.length - 1) {
-        setCurrentIndex(prev => prev + 1);
-      }
-    } else if (currentIndex < questions.length - 1) {
+      await saveCurrentAnswer();
+    }
+    if (currentIndex < questions.length - 1) {
       setCurrentIndex(prev => prev + 1);
     }
   };
 
-  const handlePrevious = () => {
+  const handlePrevious = async () => {
+    if (currentAnswer?.selectedOption && !currentAnswer.saved) {
+      await saveCurrentAnswer();
+    }
     if (currentIndex > 0) {
       setErrorMsg(null);
       setCurrentIndex(prev => prev - 1);
@@ -398,10 +414,8 @@ export default function ExamPlayPage() {
     setIsSubmitting(true);
 
     try {
-      // Attempt to save current question first if modified
-      if (currentAnswer?.selectedOption && !currentAnswer.saved) {
-        await saveCurrentAnswer();
-      }
+      // Flush ALL unsaved answers to server first to prevent answer loss
+      await flushAllUnsavedAnswers();
 
       const res = await fetch(`/api/student/attempts/${attempt.id}/submit`, { method: 'POST' });
       const data = await res.json();
@@ -426,6 +440,7 @@ export default function ExamPlayPage() {
   const handleAutoSubmit = async (reason: string) => {
     if (!attempt) return;
     try {
+      await flushAllUnsavedAnswers();
       await fetch(`/api/student/attempts/${attempt.id}/submit`, { method: 'POST' });
       if (document.fullscreenElement) {
         document.exitFullscreen().catch(() => {});

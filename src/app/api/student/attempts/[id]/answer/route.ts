@@ -20,7 +20,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       return NextResponse.json({ error: 'Missing questionId or selectedOption' }, { status: 400 });
     }
 
-    if (!['A', 'B', 'C', 'D'].includes(selectedOption)) {
+    const cleanOption = (selectedOption || '').toString().trim().toUpperCase();
+    if (!['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'].includes(cleanOption)) {
       return NextResponse.json({ error: 'Invalid option selected' }, { status: 400 });
     }
 
@@ -55,7 +56,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     }
 
     // Evaluate correct MCQ option directly without mandatory justification
-    const isCorrect = selectedOption === question.correctOption;
+    const isCorrect = cleanOption === (question.correctOption || '').toString().trim().toUpperCase();
     const finalScore = isCorrect ? (question.marks || 1) : 0;
 
     const answerId = `ans_${attemptId}_${questionId}`;
@@ -67,7 +68,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
           _id: answerId,
           attemptId,
           questionId,
-          selectedOption,
+          selectedOption: cleanOption,
           justification: (justification || '').trim(),
           aiOptionCorrect: isCorrect,
           aiJustificationQuality: 'Standard MCQ',

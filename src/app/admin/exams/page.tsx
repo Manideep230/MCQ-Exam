@@ -52,13 +52,32 @@ export default function AdminExamsListPage() {
     }
   };
 
+  const handleToggleStatus = async (id: string, currentStatus: string) => {
+    const targetStatus = currentStatus === 'disabled' ? 'active' : 'disabled';
+    const actionText = targetStatus === 'disabled' ? 'DISABLE' : 'ENABLE';
+    if (!confirm(`Are you sure you want to ${actionText} this exam for students?`)) return;
+
+    try {
+      const res = await fetch(`/api/admin/exams/${id}/toggle-status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: targetStatus }),
+      });
+      if (res.ok) {
+        fetchExams();
+      }
+    } catch (err) {
+      console.error('Toggle exam status error:', err);
+    }
+  };
+
   return (
     <div className="space-y-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-white tracking-tight">EXAMINATION MANAGEMENT</h1>
-          <p className="text-xs text-slate-400 mt-1">Schedule exams, configure window timing, and assign question banks.</p>
+          <p className="text-xs text-slate-400 mt-1">Schedule exams, configure window timing, assign question banks, and enable/disable exams for batches.</p>
         </div>
 
         <Link
@@ -81,14 +100,26 @@ export default function AdminExamsListPage() {
         ) : (
           exams.map((exam) => {
             const start = new Date(exam.startAt);
-            const end = new Date(exam.endAt);
+            const isDisabled = exam.status === 'disabled';
             return (
-              <div key={exam.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl flex flex-col justify-between">
+              <div key={exam.id} className={`bg-slate-900 border rounded-2xl p-6 space-y-4 shadow-xl flex flex-col justify-between transition-all ${
+                isDisabled ? 'border-red-900/60 opacity-85' : 'border-slate-800'
+              }`}>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="px-2.5 py-1 rounded-full bg-blue-950 text-blue-400 border border-blue-800 text-[10px] font-bold uppercase">
-                      {exam.durationMinutes} MINS
-                    </span>
+                    <div className="flex items-center space-x-2">
+                      <span className="px-2.5 py-1 rounded-full bg-blue-950 text-blue-400 border border-blue-800 text-[10px] font-bold uppercase">
+                        {exam.durationMinutes} MINS
+                      </span>
+                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                        isDisabled
+                          ? 'bg-red-950 text-red-400 border border-red-800'
+                          : 'bg-emerald-950 text-emerald-400 border border-emerald-800'
+                      }`}>
+                        {isDisabled ? 'DISABLED' : 'ACTIVE'}
+                      </span>
+                    </div>
+
                     <div className="flex items-center space-x-1">
                       <button
                         onClick={() => handleDelete(exam.id)}
@@ -135,8 +166,20 @@ export default function AdminExamsListPage() {
                     href={`/admin/questions?examId=${exam.id}`}
                     className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl text-center border border-slate-700 transition-all"
                   >
-                    Manage Questions ({exam.questionCount})
+                    Questions ({exam.questionCount})
                   </Link>
+
+                  <button
+                    onClick={() => handleToggleStatus(exam.id, exam.status)}
+                    className={`px-3 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider border transition-all ${
+                      isDisabled
+                        ? 'bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border-emerald-800'
+                        : 'bg-red-950 hover:bg-red-900 text-red-300 border-red-800'
+                    }`}
+                    title={isDisabled ? 'Enable Exam for Students' : 'Disable Exam for Students'}
+                  >
+                    {isDisabled ? 'Enable Exam' : 'Disable Exam'}
+                  </button>
                 </div>
               </div>
             );

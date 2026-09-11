@@ -12,14 +12,9 @@ interface QuestionItem {
   examTitle: string;
   questionText: string;
   marks: number;
-  correctOption: 'A' | 'B' | 'C' | 'D';
+  correctOption: string;
   orderIndex: number;
-  options: {
-    A: string;
-    B: string;
-    C: string;
-    D: string;
-  };
+  options: Record<string, string>;
 }
 
 interface ExamOption {
@@ -55,7 +50,7 @@ function AdminQuestionsContent() {
   const [optionB, setOptionB] = useState('');
   const [optionC, setOptionC] = useState('');
   const [optionD, setOptionD] = useState('');
-  const [correctOption, setCorrectOption] = useState<'A' | 'B' | 'C' | 'D'>('A');
+  const [correctOption, setCorrectOption] = useState<string>('A');
   const [marks, setMarks] = useState(1);
   const [saveLoading, setSaveLoading] = useState(false);
 
@@ -254,7 +249,7 @@ function AdminQuestionsContent() {
               <p className="text-sm font-semibold text-white leading-relaxed">{q.questionText}</p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
-                {(['A', 'B', 'C', 'D'] as const).map(key => {
+                {Object.keys(q.options || {}).sort().map(key => {
                   const isCorrect = q.correctOption === key;
                   return (
                     <div

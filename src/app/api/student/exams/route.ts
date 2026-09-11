@@ -28,10 +28,17 @@ export async function GET(req: NextRequest) {
       // Count total questions in this exam
       const questionCount = await db.collection<QuestionDoc>(COLLECTIONS.questions).countDocuments({ examId: exam._id });
 
-      let computedStatus: 'Upcoming' | 'Available' | 'Completed' | 'Expired' = 'Upcoming';
+      let computedStatus: 'Upcoming' | 'Available' | 'Completed' | 'Expired' | 'Disabled' = 'Upcoming';
       let score = 0;
 
-      if (attempt) {
+      if (exam.status === 'disabled') {
+        computedStatus = 'Disabled';
+        if (attempt && attempt.status === 'submitted') {
+          computedStatus = 'Completed';
+          const answers = await db.collection<AnswerDoc>(COLLECTIONS.answers).find({ attemptId: attempt._id }).toArray();
+          score = answers.reduce((sum, a) => sum + (a.finalScore || 0), 0);
+        }
+      } else if (attempt) {
         if (attempt.status === 'submitted') {
           computedStatus = 'Completed';
           const answers = await db.collection<AnswerDoc>(COLLECTIONS.answers).find({ attemptId: attempt._id }).toArray();
