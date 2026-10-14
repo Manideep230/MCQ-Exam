@@ -96,6 +96,23 @@ export default function ExamPlayPage() {
           saved: !!q.savedAnswer,
         };
       });
+
+      // Restore from localStorage backup if any answers were saved locally
+      try {
+        const localCacheStr = localStorage.getItem(`exam_answers_${data.attempt.id}`);
+        if (localCacheStr) {
+          const localCache = JSON.parse(localCacheStr);
+          Object.entries(localCache).forEach(([qId, opt]) => {
+            if (opt && initialMap[qId] && !initialMap[qId].selectedOption) {
+              initialMap[qId] = {
+                selectedOption: opt as string,
+                saved: false,
+              };
+            }
+          });
+        }
+      } catch (e) {}
+
       setAnswersMap(initialMap);
 
       // Setup server countdown
@@ -317,19 +334,30 @@ export default function ExamPlayPage() {
   const currentAnswer = currentQuestion ? answersMap[currentQuestion.id] : null;
 
   const handleOptionSelect = (optionKey: string) => {
-    if (!currentQuestion) return;
-    setAnswersMap(prev => ({
-      ...prev,
-      [currentQuestion.id]: {
-        selectedOption: optionKey,
-        saved: false,
-      }
-    }));
+    if (!currentQuestion || !attempt) return;
+    setAnswersMap(prev => {
+      const updated = {
+        ...prev,
+        [currentQuestion.id]: {
+          selectedOption: optionKey,
+          saved: false,
+        }
+      };
+      // Persist backup to localStorage immediately
+      try {
+        const cache: Record<string, string> = {};
+        Object.entries(updated).forEach(([k, v]) => {
+          if (v.selectedOption) cache[k] = v.selectedOption;
+        });
+        localStorage.setItem(`exam_answers_${attempt.id}`, JSON.stringify(cache));
+      } catch (e) {}
+      return updated;
+    });
     // Instant auto-save to server on option click
     saveSingleAnswerToServer(currentQuestion.id, optionKey);
   };
 
-  const saveSingleAnswerToServer = async (questionId: string, optionKey: string): Promise<boolean> => {
+  const saveSingleAnswerToServer = async (questionId: string, optionKey: string, retryCount = 0): Promise<boolean> => {
     if (!attempt) return false;
     setErrorMsg(null);
     setSavingStatus('saving');
@@ -349,28 +377,61 @@ export default function ExamPlayPage() {
         throw new Error(data.error || 'Failed to save answer');
       }
 
-      setAnswersMap(prev => ({
-        ...prev,
-        [questionId]: {
-          selectedOption: optionKey,
-          saved: true,
-        }
-      }));
+      setAnswersMap(prev => {
+        const updated = {
+          ...prev,
+          [questionId]: {
+            selectedOption: optionKey,
+            saved: true,
+          }
+        };
+        try {
+          const cache: Record<string, string> = {};
+          Object.entries(updated).forEach(([k, v]) => {
+            if (v.selectedOption) cache[k] = v.selectedOption;
+          });
+          localStorage.setItem(`exam_answers_${attempt.id}`, JSON.stringify(cache));
+        } catch (e) {}
+        return updated;
+      });
 
       setSavingStatus('saved');
       setTimeout(() => setSavingStatus('idle'), 2000);
       return true;
     } catch (err: any) {
+      console.warn(`Save answer failed for question ${questionId} (attempt ${retryCount + 1}):`, err.message);
       setSavingStatus('error');
-      setErrorMsg(err.message);
+      // Automatic quick retry if network dropped briefly
+      if (retryCount < 2) {
+        setTimeout(() => {
+          saveSingleAnswerToServer(questionId, optionKey, retryCount + 1);
+        }, 1200);
+      }
       return false;
     }
   };
 
+  // Continuous background synchronization retry for any unsaved answers
+  useEffect(() => {
+    if (!attempt || attempt.status !== 'in_progress') return;
+
+    const retryInterval = setInterval(() => {
+      const unsaved = Object.entries(answersMap).filter(([_, val]) => val.selectedOption && !val.saved);
+      if (unsaved.length > 0) {
+        unsaved.forEach(([qId, val]) => {
+          if (val.selectedOption) {
+            saveSingleAnswerToServer(qId, val.selectedOption);
+          }
+        });
+      }
+    }, 4000);
+
+    return () => clearInterval(retryInterval);
+  }, [attempt, answersMap]);
+
   const saveCurrentAnswer = async (): Promise<boolean> => {
     if (!currentQuestion || !currentAnswer || !attempt) return false;
     if (!currentAnswer.selectedOption) {
-      setErrorMsg('Please select an option before proceeding.');
       return false;
     }
     return await saveSingleAnswerToServer(currentQuestion.id, currentAnswer.selectedOption);
@@ -386,9 +447,18 @@ export default function ExamPlayPage() {
     }
   };
 
+  const handleNavigateQuestion = async (targetIdx: number) => {
+    if (targetIdx === currentIndex) return;
+    if (currentQuestion && currentAnswer?.selectedOption && !currentAnswer.saved) {
+      saveSingleAnswerToServer(currentQuestion.id, currentAnswer.selectedOption);
+    }
+    setErrorMsg(null);
+    setCurrentIndex(targetIdx);
+  };
+
   const handleNext = async () => {
     if (currentAnswer?.selectedOption && !currentAnswer.saved) {
-      await saveCurrentAnswer();
+      saveSingleAnswerToServer(currentQuestion.id, currentAnswer.selectedOption);
     }
     if (currentIndex < questions.length - 1) {
       setCurrentIndex(prev => prev + 1);
@@ -397,12 +467,22 @@ export default function ExamPlayPage() {
 
   const handlePrevious = async () => {
     if (currentAnswer?.selectedOption && !currentAnswer.saved) {
-      await saveCurrentAnswer();
+      saveSingleAnswerToServer(currentQuestion.id, currentAnswer.selectedOption);
     }
     if (currentIndex > 0) {
       setErrorMsg(null);
       setCurrentIndex(prev => prev - 1);
     }
+  };
+
+  const getAnswersPayload = (): Record<string, string> => {
+    const payload: Record<string, string> = {};
+    Object.entries(answersMap).forEach(([qId, val]) => {
+      if (val.selectedOption) {
+        payload[qId] = val.selectedOption;
+      }
+    });
+    return payload;
   };
 
   const handleManualSubmit = () => {
@@ -414,15 +494,25 @@ export default function ExamPlayPage() {
     setIsSubmitting(true);
 
     try {
-      // Flush ALL unsaved answers to server first to prevent answer loss
+      // 1. Flush any pending unsaved answers in state
       await flushAllUnsavedAnswers();
 
-      const res = await fetch(`/api/student/attempts/${attempt.id}/submit`, { method: 'POST' });
+      // 2. Submit with entire answers payload so server guarantees all marked answers are saved
+      const answersPayload = getAnswersPayload();
+      const res = await fetch(`/api/student/attempts/${attempt.id}/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ answers: answersPayload }),
+      });
       const data = await res.json();
 
       if (!res.ok) {
         throw new Error(data.error || 'Failed to submit examination');
       }
+
+      try {
+        localStorage.removeItem(`exam_answers_${attempt.id}`);
+      } catch (e) {}
 
       // Exit fullscreen before redirecting
       if (document.fullscreenElement) {
@@ -441,7 +531,15 @@ export default function ExamPlayPage() {
     if (!attempt) return;
     try {
       await flushAllUnsavedAnswers();
-      await fetch(`/api/student/attempts/${attempt.id}/submit`, { method: 'POST' });
+      const answersPayload = getAnswersPayload();
+      await fetch(`/api/student/attempts/${attempt.id}/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ answers: answersPayload }),
+      });
+      try {
+        localStorage.removeItem(`exam_answers_${attempt.id}`);
+      } catch (e) {}
       if (document.fullscreenElement) {
         document.exitFullscreen().catch(() => {});
       }
@@ -638,14 +736,18 @@ export default function ExamPlayPage() {
             </h3>
 
             {/* Status Legend */}
-            <div className="grid grid-cols-2 gap-2 text-[10px] font-medium text-slate-400 pt-1">
-              <div className="flex items-center space-x-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                <span>Answered</span>
+            <div className="grid grid-cols-3 gap-1.5 text-[9px] font-medium text-slate-400 pt-1">
+              <div className="flex items-center space-x-1">
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                <span>Saved</span>
               </div>
-              <div className="flex items-center space-x-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-slate-700" />
-                <span>Unanswered</span>
+              <div className="flex items-center space-x-1">
+                <span className="w-2 h-2 rounded-full bg-amber-400" />
+                <span>Syncing</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <span className="w-2 h-2 rounded-full bg-slate-700" />
+                <span>Empty</span>
               </div>
             </div>
 
@@ -654,21 +756,27 @@ export default function ExamPlayPage() {
               {questions.map((q, idx) => {
                 const ans = answersMap[q.id];
                 const isAnswered = ans && ans.selectedOption !== null;
+                const isSaved = ans && ans.saved;
                 const isCurrent = idx === currentIndex;
 
                 return (
                   <button
                     key={q.id}
-                    onClick={() => { setErrorMsg(null); setCurrentIndex(idx); }}
-                    className={`h-9 rounded-lg font-mono text-xs font-bold transition-all flex items-center justify-center ${
+                    onClick={() => handleNavigateQuestion(idx)}
+                    className={`h-9 rounded-lg font-mono text-xs font-bold transition-all flex items-center justify-center relative ${
                       isCurrent
                         ? 'bg-blue-600 text-white ring-2 ring-blue-400 ring-offset-2 ring-offset-slate-900 shadow-md'
                         : isAnswered
-                        ? 'bg-emerald-950 text-emerald-300 border border-emerald-800/80 hover:bg-emerald-900'
+                        ? isSaved
+                          ? 'bg-emerald-950 text-emerald-300 border border-emerald-800/80 hover:bg-emerald-900'
+                          : 'bg-amber-950 text-amber-300 border border-amber-800/80 hover:bg-amber-900 animate-pulse'
                         : 'bg-slate-950 text-slate-400 border border-slate-800 hover:border-slate-700'
                     }`}
                   >
                     {idx + 1}
+                    {isAnswered && !isSaved && (
+                      <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-amber-400" />
+                    )}
                   </button>
                 );
               })}

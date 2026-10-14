@@ -38,9 +38,10 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       return NextResponse.json({ error: 'Exam attempt is no longer active.' }, { status: 400 });
     }
 
-    // Server-side timing check
+    // Server-side timing check with 30s network grace period for in-flight requests
     const deadline = new Date(attempt.deadlineAt);
-    if (now > deadline) {
+    const deadlineWithGrace = new Date(deadline.getTime() + 30000);
+    if (now > deadlineWithGrace) {
       await db.collection<AttemptDoc>(COLLECTIONS.attempts).updateOne(
         { _id: attemptId },
         { $set: { status: 'expired', submittedAt: attempt.deadlineAt, updatedAt: nowIso } }
@@ -65,7 +66,6 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       { attemptId, questionId },
       {
         $set: {
-          _id: answerId,
           attemptId,
           questionId,
           selectedOption: cleanOption,
@@ -78,6 +78,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
           evaluationStatus: 'completed',
           answeredAt: nowIso,
           updatedAt: nowIso,
+        },
+        $setOnInsert: {
+          _id: answerId,
         }
       },
       { upsert: true }
