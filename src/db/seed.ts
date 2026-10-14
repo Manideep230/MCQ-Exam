@@ -2,6 +2,7 @@ import { MongoClient } from 'mongodb';
 import bcrypt from 'bcryptjs';
 import { AdminDoc, StudentDoc, ExamDoc, QuestionDoc } from './schema';
 import { PYTHON_BASICS_QUESTIONS } from './pythonBasicsQuestions';
+import { IOT_SECURITY_QUESTIONS } from './iotSecurityQuestions';
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://manideepjuvvala215_db_user:o8qBudNZ3l42K3qU@cluster0.en0rmfg.mongodb.net/';
 const DB_NAME = process.env.MONGODB_DB_NAME || 'mcq_exam_portal';
@@ -533,6 +534,56 @@ async function seed() {
     );
   }
   console.log(`✅ Seeded/Upserted ${PYTHON_BASICS_QUESTIONS.length} Python Basics Questions with 8 options each.`);
+
+  // 4c. Seed IoT Security and IoT System Design Exam Part - 1 (120 MCQs)
+  const iotExamId = 'exam_iot_security_part_1';
+  await examsCol.updateOne(
+    { _id: iotExamId },
+    {
+      $set: {
+        title: 'IoT Security and IoT System Design Exam Part - 1',
+        description: 'Comprehensive 120-question examination on IoT Security Fundamentals, Attacks & Threats, Authentication & Digital Certificates, Device & Firmware Security, Network Security, Secure Protocols, System Design, and Cloud Applications.',
+        durationMinutes: 60,
+        startAt: startDate.toISOString(),
+        endAt: endDate.toISOString(),
+        totalMarks: IOT_SECURITY_QUESTIONS.length,
+        status: 'active',
+        showResults: true,
+        allowBackNav: true,
+        abandonmentTimeoutSeconds: 60,
+        updatedAt: now.toISOString(),
+      },
+      $setOnInsert: {
+        createdAt: now.toISOString(),
+      }
+    },
+    { upsert: true }
+  );
+
+  for (let i = 0; i < IOT_SECURITY_QUESTIONS.length; i++) {
+    const q = IOT_SECURITY_QUESTIONS[i];
+    const questionId = `q_iot120_${i + 1}`;
+
+    await questionsCol.updateOne(
+      { _id: questionId },
+      {
+        $set: {
+          examId: iotExamId,
+          questionText: q.questionText,
+          marks: 1,
+          correctOption: q.correctOption,
+          orderIndex: i + 1,
+          options: q.options,
+          updatedAt: now.toISOString(),
+        },
+        $setOnInsert: {
+          createdAt: now.toISOString(),
+        }
+      },
+      { upsert: true }
+    );
+  }
+  console.log(`✅ Seeded/Upserted ${IOT_SECURITY_QUESTIONS.length} IoT Security Questions with 8 options each.`);
 
   // 5. Create indexes for performance
   await studentsCol.createIndex({ rollNumber: 1 }, { unique: true });
