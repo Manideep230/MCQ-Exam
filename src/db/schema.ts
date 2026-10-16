@@ -87,3 +87,31 @@ export interface ExamEventDoc {
   eventTimestamp: string;
   metadata?: string | null;
 }
+
+export interface FeedbackDoc {
+  _id: string;
+  studentId: string;
+  rollNumber: string;
+  fullName: string;
+  branch: string;
+  collegeName?: string | null;
+  answers: Record<string, any>; // maps q1..q83 to values
+  summaryStats: {
+    avgTopicRating: number;
+    avgTrainerRating: number;
+    avgPracticalRating: number;
+    overallSatisfaction: number;
+    attendance: string;
+    priorKnowledge: string;
+  };
+  submittedAt: string;
+  updatedAt: string;
+}
+
+export interface FeedbackSettingsDoc {
+  _id: string; // 'feedback_config'
+  isFormEnabled: boolean;
+  isGoogleFormEnabled: boolean;
+  googleFormUrl: string;
+  updatedAt: string;
+}

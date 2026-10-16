@@ -40,4 +40,6 @@ export const COLLECTIONS = {
   attempts: 'attempts',
   answers: 'answers',
   examEvents: 'exam_events',
+  feedbacks: 'feedbacks',
+  feedbackSettings: 'feedback_settings',
 } as const;

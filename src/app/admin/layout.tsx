@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, Users, BookOpen, HelpCircle, Award, Eye, LogOut, GraduationCap, Menu, X, Shield } from 'lucide-react';
+import { LayoutDashboard, Users, BookOpen, HelpCircle, Award, Eye, LogOut, GraduationCap, Menu, X, Shield, Trophy, MessageSquare } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -13,10 +13,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const navItems = [
     { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
     { label: 'Students', href: '/admin/students', icon: Users },
+    { label: 'Leaderboard', href: '/admin/leaderboard', icon: Trophy },
     { label: 'Exams', href: '/admin/exams', icon: BookOpen },
     { label: 'Question Bank', href: '/admin/questions', icon: HelpCircle },
     { label: 'Results', href: '/admin/results', icon: Award },
     { label: 'Audit Monitoring', href: '/admin/monitoring', icon: Eye },
+    { label: 'Student Feedback', href: '/admin/feedback', icon: MessageSquare },
   ];
 
   const handleLogout = async () => {

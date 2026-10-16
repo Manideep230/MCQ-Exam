@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { GraduationCap, LogOut, Clock, Calendar, HelpCircle, Award, CheckCircle2, PlayCircle, Lock, AlertCircle } from 'lucide-react';
+import Link from 'next/link';
+import { GraduationCap, LogOut, Clock, Calendar, HelpCircle, Award, CheckCircle2, PlayCircle, Lock, AlertCircle, MessageSquare, Sparkles } from 'lucide-react';
 
 interface StudentUser {
   id: string;
@@ -95,13 +96,23 @@ export default function StudentDashboard() {
             </div>
           </div>
 
-          <button
-            onClick={handleLogout}
-            className="flex items-center space-x-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition-all"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Logout</span>
-          </button>
+          <div className="flex items-center space-x-2.5">
+            <Link
+              href="/student/feedback"
+              className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 text-xs font-bold border border-blue-500/40 transition-all shadow-sm"
+            >
+              <MessageSquare className="w-4 h-4 text-blue-400" />
+              <span>Training Feedback</span>
+            </Link>
+
+            <button
+              onClick={handleLogout}
+              className="flex items-center space-x-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition-all"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Logout</span>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -131,6 +142,33 @@ export default function StudentDashboard() {
               <p className="text-sm font-bold text-slate-200 truncate">{user?.collegeName || '-'}</p>
             </div>
           </div>
+        </div>
+
+        {/* FSI Training Feedback Action Banner */}
+        <div className="bg-gradient-to-r from-indigo-950/60 via-slate-900 to-blue-950/60 border border-blue-800/60 rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1.5">
+            <div className="flex items-center space-x-2">
+              <span className="px-2.5 py-0.5 rounded-full bg-blue-900/60 text-blue-300 border border-blue-700/60 text-[10px] font-bold uppercase tracking-wider flex items-center space-x-1">
+                <Sparkles className="w-3 h-3 text-blue-400" />
+                <span>STUDENT ACTION REQUIRED</span>
+              </span>
+              <span className="text-xs text-slate-400 font-semibold">GMRIT — Final Year (ECE & EEE)</span>
+            </div>
+            <h3 className="text-lg font-bold text-white tracking-wide">
+              FSI Technical Training — Student Feedback Form
+            </h3>
+            <p className="text-xs text-slate-400 max-w-2xl leading-relaxed">
+              Please provide your honest evaluation regarding training methodology, technical domains (IoT, IIoT, MongoDB, Python, Edge AI, Neural Networks), and project planning.
+            </p>
+          </div>
+
+          <Link
+            href="/student/feedback"
+            className="px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center space-x-2 shrink-0 shadow-lg shadow-blue-600/30 transition-all"
+          >
+            <MessageSquare className="w-4 h-4" />
+            <span>Open Feedback Form</span>
+          </Link>
         </div>
 
         {error && (
