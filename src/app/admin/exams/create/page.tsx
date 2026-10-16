@@ -60,27 +60,27 @@ export default function AdminCreateExamPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="max-w-3xl mx-auto space-y-6 text-[#064E3B]">
       <div className="flex items-center justify-between">
         <button
           onClick={() => router.push('/admin/exams')}
-          className="flex items-center space-x-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
+          className="flex items-center space-x-2 text-xs font-black text-[#064E3B] hover:text-[#04382b] transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Exams</span>
         </button>
       </div>
 
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 space-y-6 shadow-2xl">
+      <div className="bg-[#faedd7] border-2 border-[#064E3B]/25 rounded-2xl p-6 sm:p-8 space-y-6 shadow-xl">
         <div>
-          <span className="text-xs font-bold text-blue-400 uppercase tracking-widest">EXAM CREATION WIZARD</span>
-          <h1 className="text-2xl font-black text-white mt-1">Schedule New MCQ Examination</h1>
-          <p className="text-xs text-slate-400 mt-1">Configure exam parameters, window timing, and anti-cheating rule settings.</p>
+          <span className="text-xs font-black text-[#064E3B] uppercase tracking-widest">EXAM CREATION WIZARD</span>
+          <h1 className="text-2xl font-black text-[#064E3B] mt-1">Schedule New MCQ Examination</h1>
+          <p className="text-xs text-[#064E3B]/80 mt-1 font-semibold">Configure exam parameters, window timing, and anti-cheating rule settings.</p>
         </div>
 
         {error && (
-          <div className="p-4 rounded-xl bg-red-950/60 border border-red-800 text-red-300 text-xs flex items-center space-x-3">
-            <AlertCircle className="w-4 h-4 text-red-400" />
+          <div className="p-4 rounded-xl bg-red-100 border-2 border-red-400 text-red-900 text-xs flex items-center space-x-3 font-semibold">
+            <AlertCircle className="w-4 h-4 text-red-700" />
             <span>{error}</span>
           </div>
         )}
@@ -88,7 +88,7 @@ export default function AdminCreateExamPage() {
         <form onSubmit={handleSubmit} className="space-y-6">
           
           <div>
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-black text-[#064E3B] uppercase tracking-wider mb-2">
               Exam Title
             </label>
             <input
@@ -97,12 +97,12 @@ export default function AdminCreateExamPage() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. MongoDB Basics"
-              className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 bg-[#fffdf9] border-2 border-[#064E3B]/25 rounded-xl text-[#064E3B] text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#064E3B]"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-black text-[#064E3B] uppercase tracking-wider mb-2">
               Description / Instructions Summary
             </label>
             <textarea
@@ -110,13 +110,13 @@ export default function AdminCreateExamPage() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Enter exam guidelines or topic coverage summary..."
-              className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 bg-[#fffdf9] border-2 border-[#064E3B]/25 rounded-xl text-[#064E3B] text-xs leading-relaxed font-semibold focus:outline-none focus:ring-2 focus:ring-[#064E3B]"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+              <label className="block text-xs font-black text-[#064E3B] uppercase tracking-wider mb-2">
                 Duration (Minutes)
               </label>
               <input
@@ -126,12 +126,12 @@ export default function AdminCreateExamPage() {
                 max={300}
                 value={durationMinutes}
                 onChange={(e) => setDurationMinutes(Number(e.target.value))}
-                className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm font-mono font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 bg-[#fffdf9] border-2 border-[#064E3B]/25 rounded-xl text-[#064E3B] text-sm font-mono font-black focus:outline-none focus:ring-2 focus:ring-[#064E3B]"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+              <label className="block text-xs font-black text-[#064E3B] uppercase tracking-wider mb-2">
                 Total Marks
               </label>
               <input
@@ -140,16 +140,16 @@ export default function AdminCreateExamPage() {
                 min={1}
                 value={totalMarks}
                 onChange={(e) => setTotalMarks(Number(e.target.value))}
-                className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm font-mono font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 bg-[#fffdf9] border-2 border-[#064E3B]/25 rounded-xl text-[#064E3B] text-sm font-mono font-black focus:outline-none focus:ring-2 focus:ring-[#064E3B]"
               />
             </div>
           </div>
 
           {/* Server-Controlled Scheduling Window */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-xl bg-slate-950 border border-slate-800">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-xl bg-[#fffdf9] border-2 border-[#064E3B]/20">
             <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 flex items-center space-x-1.5">
-                <Calendar className="w-3.5 h-3.5 text-emerald-400" />
+              <label className="block text-xs font-black text-[#064E3B] uppercase tracking-wider mb-2 flex items-center space-x-1.5">
+                <Calendar className="w-3.5 h-3.5 text-[#064E3B]" />
                 <span>Start Date & Time (Server Time)</span>
               </label>
               <input
@@ -157,13 +157,13 @@ export default function AdminCreateExamPage() {
                 required
                 value={startAt}
                 onChange={(e) => setStartAt(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-white text-xs font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full px-3.5 py-2.5 bg-[#faedd7] border-2 border-[#064E3B]/25 rounded-xl text-[#064E3B] text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#064E3B]"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 flex items-center space-x-1.5">
-                <Calendar className="w-3.5 h-3.5 text-amber-400" />
+              <label className="block text-xs font-black text-[#064E3B] uppercase tracking-wider mb-2 flex items-center space-x-1.5">
+                <Calendar className="w-3.5 h-3.5 text-[#064E3B]" />
                 <span>End Date & Time (Server Time)</span>
               </label>
               <input
@@ -171,44 +171,44 @@ export default function AdminCreateExamPage() {
                 required
                 value={endAt}
                 onChange={(e) => setEndAt(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-white text-xs font-mono focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full px-3.5 py-2.5 bg-[#faedd7] border-2 border-[#064E3B]/25 rounded-xl text-[#064E3B] text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#064E3B]"
               />
             </div>
           </div>
 
-          {/* Settings Toggles (Rule #36) */}
-          <div className="space-y-4 pt-2 border-t border-slate-800">
-            <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider">Exam Control Settings</h4>
+          {/* Settings Toggles */}
+          <div className="space-y-4 pt-2 border-t-2 border-[#064E3B]/10">
+            <h4 className="text-xs font-black text-[#064E3B] uppercase tracking-wider">Exam Control Settings</h4>
             
             <div className="space-y-3">
-              <label className="flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer">
+              <label className="flex items-center justify-between p-3 rounded-xl bg-[#fffdf9] border-2 border-[#064E3B]/20 cursor-pointer">
                 <div>
-                  <span className="text-xs font-bold text-white block">Show Results to Students Immediately</span>
-                  <span className="text-[10px] text-slate-400 block">If turned off, students see "Results will be released by administrator" upon submission.</span>
+                  <span className="text-xs font-black text-[#064E3B] block">Show Results to Students Immediately</span>
+                  <span className="text-[10px] text-[#064E3B]/70 block font-semibold">If turned off, students see "Results will be released by administrator" upon submission.</span>
                 </div>
                 <input
                   type="checkbox"
                   checked={showResults}
                   onChange={(e) => setShowResults(e.target.checked)}
-                  className="h-4 w-4 rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-blue-500"
+                  className="h-4 w-4 rounded border-[#064E3B] text-[#064E3B] focus:ring-[#064E3B]"
                 />
               </label>
 
-              <label className="flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer">
+              <label className="flex items-center justify-between p-3 rounded-xl bg-[#fffdf9] border-2 border-[#064E3B]/20 cursor-pointer">
                 <div>
-                  <span className="text-xs font-bold text-white block">Allow Previous Question Navigation</span>
-                  <span className="text-[10px] text-slate-400 block">Allows students to return and edit previous answers during the exam.</span>
+                  <span className="text-xs font-black text-[#064E3B] block">Allow Previous Question Navigation</span>
+                  <span className="text-[10px] text-[#064E3B]/70 block font-semibold">Allows students to return and edit previous answers during the exam.</span>
                 </div>
                 <input
                   type="checkbox"
                   checked={allowBackNav}
                   onChange={(e) => setAllowBackNav(e.target.checked)}
-                  className="h-4 w-4 rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-blue-500"
+                  className="h-4 w-4 rounded border-[#064E3B] text-[#064E3B] focus:ring-[#064E3B]"
                 />
               </label>
 
-              <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-                <label className="block text-xs font-bold text-white">
+              <div className="p-3.5 rounded-xl bg-[#fffdf9] border-2 border-[#064E3B]/20 space-y-2">
+                <label className="block text-xs font-black text-[#064E3B]">
                   Abandonment Heartbeat Timeout (Seconds)
                 </label>
                 <input
@@ -218,9 +218,9 @@ export default function AdminCreateExamPage() {
                   max={300}
                   value={abandonmentTimeoutSeconds}
                   onChange={(e) => setAbandonmentTimeoutSeconds(Number(e.target.value))}
-                  className="w-full px-3.5 py-2 bg-slate-900 border border-slate-800 rounded-xl text-white text-xs font-mono font-bold"
+                  className="w-full px-3.5 py-2 bg-[#faedd7] border-2 border-[#064E3B]/25 rounded-xl text-[#064E3B] text-xs font-mono font-bold"
                 />
-                <span className="text-[10px] text-slate-400 block">
+                <span className="text-[10px] text-[#064E3B]/70 block font-medium">
                   If student heartbeat is lost for more than this duration (default 60s), the exam is submitted as abandoned.
                 </span>
               </div>
@@ -230,7 +230,7 @@ export default function AdminCreateExamPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-xl shadow-blue-600/30"
+            className="w-full py-4 bg-[#064E3B] hover:bg-[#04382b] text-[#f8e7c9] font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-md border-2 border-[#064E3B]"
           >
             {loading ? 'CREATING EXAM SCHEDULE...' : 'SAVE & SCHEDULE EXAMINATION'}
           </button>

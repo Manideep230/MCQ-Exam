@@ -18,7 +18,7 @@ interface ResultData {
 
 export default function StudentResultPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400 text-sm">Loading examination results...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[#f8e7c9] flex items-center justify-center text-[#064E3B] font-semibold text-sm">Loading examination results...</div>}>
       <StudentResultContent />
     </Suspense>
   );

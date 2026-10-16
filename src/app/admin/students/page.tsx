@@ -137,17 +137,17 @@ export default function AdminStudentsPage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 text-[#064E3B]">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white tracking-tight">STUDENT MANAGEMENT</h1>
-          <p className="text-xs text-slate-400 mt-1">Enroll student accounts using Roll Number and Temporary Password.</p>
+          <h1 className="text-2xl font-black text-[#064E3B] tracking-tight">STUDENT MANAGEMENT</h1>
+          <p className="text-xs text-[#064E3B]/80 mt-1 font-semibold">Enroll student accounts using Roll Number and Temporary Password.</p>
         </div>
 
         <button
           onClick={() => setShowAddModal(true)}
-          className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold uppercase tracking-wider flex items-center space-x-2 shadow-lg shadow-blue-600/20"
+          className="px-4 py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#04382b] text-[#f8e7c9] text-xs font-black uppercase tracking-wider flex items-center space-x-2 shadow-md border-2 border-[#064E3B]"
         >
           <Plus className="w-4 h-4" />
           <span>Add New Student</span>
@@ -155,28 +155,28 @@ export default function AdminStudentsPage() {
       </div>
 
       {error && (
-        <div className="p-4 rounded-xl bg-red-950/60 border border-red-800 text-red-300 text-xs flex items-center space-x-3">
-          <AlertCircle className="w-4 h-4 text-red-400" />
+        <div className="p-4 rounded-xl bg-red-100 border-2 border-red-400 text-red-900 text-xs flex items-center space-x-3 font-semibold">
+          <AlertCircle className="w-4 h-4 text-red-700" />
           <span>{error}</span>
         </div>
       )}
 
       {/* Filter & Search Bar */}
-      <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+      <div className="bg-[#faedd7] border-2 border-[#064E3B]/20 p-4 rounded-2xl shadow-sm">
         <form onSubmit={handleSearch} className="flex space-x-3">
           <div className="relative flex-1">
-            <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-3" />
+            <Search className="w-4 h-4 text-[#064E3B]/60 absolute left-3.5 top-3" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by Roll Number, Name, Branch, or College..."
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-4 py-2.5 bg-[#fffdf9] border-2 border-[#064E3B]/25 rounded-xl text-[#064E3B] text-xs placeholder-[#064E3B]/40 font-bold focus:outline-none focus:ring-2 focus:ring-[#064E3B]"
             />
           </div>
           <button
             type="submit"
-            className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl border border-slate-700"
+            className="px-4 py-2.5 bg-[#064E3B] hover:bg-[#04382b] text-[#f8e7c9] text-xs font-black rounded-xl border border-[#064E3B]"
           >
             Search
           </button>
@@ -184,11 +184,11 @@ export default function AdminStudentsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+      <div className="bg-[#fffdf9] border-2 border-[#064E3B]/25 rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-950 text-slate-400 text-[10px] uppercase font-bold tracking-wider border-b border-slate-800">
+              <tr className="bg-[#faedd7] text-[#064E3B] text-[10px] uppercase font-black tracking-wider border-b-2 border-[#064E3B]/20">
                 <th className="py-4 px-6">Roll Number</th>
                 <th className="py-4 px-6">Full Name</th>
                 <th className="py-4 px-6">Branch</th>
@@ -198,36 +198,36 @@ export default function AdminStudentsPage() {
                 <th className="py-4 px-6 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800 text-xs">
+            <tbody className="divide-y divide-[#064E3B]/10 text-xs">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-slate-500">Loading student directory...</td>
+                  <td colSpan={7} className="py-8 text-center text-[#064E3B]/60 font-bold">Loading student directory...</td>
                 </tr>
               ) : students.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-slate-500">No student records found.</td>
+                  <td colSpan={7} className="py-8 text-center text-[#064E3B]/60 font-bold">No student records found.</td>
                 </tr>
               ) : (
                 students.map((student) => (
-                  <tr key={student.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="py-4 px-6 font-mono font-bold text-white">{student.rollNumber}</td>
-                    <td className="py-4 px-6 font-medium text-slate-200">{student.fullName}</td>
-                    <td className="py-4 px-6 text-slate-400">{student.branch}</td>
-                    <td className="py-4 px-6 text-slate-400 truncate max-w-[150px]">{student.collegeName}</td>
+                  <tr key={student.id} className="hover:bg-[#faedd7]/40 transition-colors">
+                    <td className="py-4 px-6 font-mono font-black text-[#064E3B]">{student.rollNumber}</td>
+                    <td className="py-4 px-6 font-black text-[#064E3B]">{student.fullName}</td>
+                    <td className="py-4 px-6 text-[#064E3B]/80 font-bold">{student.branch}</td>
+                    <td className="py-4 px-6 text-[#064E3B]/80 font-semibold truncate max-w-[150px]">{student.collegeName}</td>
                     <td className="py-4 px-6">
-                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-black ${
                         student.profileCompleted
-                          ? 'bg-emerald-950 text-emerald-400 border border-emerald-800'
-                          : 'bg-amber-950 text-amber-400 border border-amber-800'
+                          ? 'bg-[#064E3B]/15 text-[#064E3B] border border-[#064E3B]/40'
+                          : 'bg-amber-100 text-amber-800 border border-amber-300'
                       }`}>
                         {student.profileCompleted ? 'COMPLETED' : 'PENDING'}
                       </span>
                     </td>
                     <td className="py-4 px-6">
-                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-black ${
                         student.accountStatus === 'active'
-                          ? 'bg-blue-950 text-blue-400 border border-blue-800'
-                          : 'bg-red-950 text-red-400 border border-red-800'
+                          ? 'bg-[#064E3B] text-[#f8e7c9]'
+                          : 'bg-red-100 text-red-800 border border-red-300'
                       }`}>
                         {student.accountStatus.toUpperCase()}
                       </span>
@@ -236,28 +236,28 @@ export default function AdminStudentsPage() {
                       <button
                         onClick={() => openHistory(student)}
                         title="View Exam History"
-                        className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+                        className="p-1.5 rounded-lg bg-[#faedd7] hover:bg-[#f3deba] border border-[#064E3B]/30 text-[#064E3B] transition-colors"
                       >
-                        <History className="w-4 h-4 text-blue-400" />
+                        <History className="w-4 h-4 text-[#064E3B]" />
                       </button>
                       
                       <button
                         onClick={() => setResetModalStudent(student)}
                         title="Reset Password"
-                        className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+                        className="p-1.5 rounded-lg bg-[#faedd7] hover:bg-[#f3deba] border border-[#064E3B]/30 text-[#064E3B] transition-colors"
                       >
-                        <Key className="w-4 h-4 text-amber-400" />
+                        <Key className="w-4 h-4 text-[#064E3B]" />
                       </button>
 
                       <button
                         onClick={() => toggleAccountStatus(student)}
                         title={student.accountStatus === 'active' ? 'Disable Account' : 'Enable Account'}
-                        className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+                        className="p-1.5 rounded-lg bg-[#faedd7] hover:bg-[#f3deba] border border-[#064E3B]/30 text-[#064E3B] transition-colors"
                       >
                         {student.accountStatus === 'active' ? (
-                          <XCircle className="w-4 h-4 text-red-400" />
+                          <XCircle className="w-4 h-4 text-red-700" />
                         ) : (
-                          <CheckCircle className="w-4 h-4 text-emerald-400" />
+                          <CheckCircle className="w-4 h-4 text-[#064E3B]" />
                         )}
                       </button>
                     </td>
@@ -271,22 +271,22 @@ export default function AdminStudentsPage() {
 
       {/* Add Student Modal (Requirement #9) */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-md w-full space-y-5 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Add Student Account</h3>
-              <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-white">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#faedd7] border-2 border-[#064E3B] rounded-2xl p-6 max-w-md w-full space-y-5 shadow-2xl text-[#064E3B]">
+            <div className="flex items-center justify-between border-b-2 border-[#064E3B]/15 pb-3">
+              <h3 className="text-sm font-black text-[#064E3B] uppercase tracking-wider">Add Student Account</h3>
+              <button onClick={() => setShowAddModal(false)} className="text-[#064E3B]/70 hover:text-[#064E3B]">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-[#064E3B]/80 font-medium">
               Only enter the Roll Number and Temporary Password. Name, branch, and college will be populated by the student upon first login.
             </p>
 
             <form onSubmit={handleAddStudent} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-black text-[#064E3B] uppercase tracking-wider mb-1">
                   Roll Number
                 </label>
                 <input
@@ -295,12 +295,12 @@ export default function AdminStudentsPage() {
                   value={rollNumber}
                   onChange={(e) => setRollNumber(e.target.value)}
                   placeholder="e.g. 23CSE005"
-                  className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs uppercase tracking-wide focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3.5 py-2.5 bg-[#fffdf9] border-2 border-[#064E3B]/30 rounded-xl text-[#064E3B] text-xs uppercase tracking-wide font-bold focus:outline-none focus:ring-2 focus:ring-[#064E3B]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-black text-[#064E3B] uppercase tracking-wider mb-1">
                   Temporary Password
                 </label>
                 <input
@@ -309,14 +309,14 @@ export default function AdminStudentsPage() {
                   value={tempPassword}
                   onChange={(e) => setTempPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3.5 py-2.5 bg-[#fffdf9] border-2 border-[#064E3B]/30 rounded-xl text-[#064E3B] text-xs focus:outline-none focus:ring-2 focus:ring-[#064E3B]"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={addLoading}
-                className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-blue-600/30"
+                className="w-full py-3 bg-[#064E3B] hover:bg-[#04382b] text-[#f8e7c9] font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-md border-2 border-[#064E3B]"
               >
                 {addLoading ? 'CREATING STUDENT...' : 'CREATE STUDENT ACCOUNT'}
               </button>
@@ -327,18 +327,18 @@ export default function AdminStudentsPage() {
 
       {/* Password Reset Modal */}
       {resetModalStudent && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Reset Password: {resetModalStudent.rollNumber}</h3>
-              <button onClick={() => setResetModalStudent(null)} className="text-slate-400 hover:text-white">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#faedd7] border-2 border-[#064E3B] rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl text-[#064E3B]">
+            <div className="flex items-center justify-between border-b-2 border-[#064E3B]/15 pb-3">
+              <h3 className="text-sm font-black text-[#064E3B] uppercase tracking-wider">Reset Password: {resetModalStudent.rollNumber}</h3>
+              <button onClick={() => setResetModalStudent(null)} className="text-[#064E3B]/70 hover:text-[#064E3B]">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleResetPassword} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-black text-[#064E3B] uppercase tracking-wider mb-1">
                   New Password
                 </label>
                 <input
@@ -347,13 +347,13 @@ export default function AdminStudentsPage() {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="Enter new password"
-                  className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white text-xs focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full px-3.5 py-2.5 bg-[#fffdf9] border-2 border-[#064E3B]/30 rounded-xl text-[#064E3B] text-xs focus:outline-none focus:ring-2 focus:ring-[#064E3B]"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full py-3 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-amber-600/30"
+                className="w-full py-3 bg-[#064E3B] hover:bg-[#04382b] text-[#f8e7c9] font-black text-xs uppercase tracking-wider rounded-xl transition-all shadow-md border-2 border-[#064E3B]"
               >
                 RESET PASSWORD NOW
               </button>
@@ -364,35 +364,35 @@ export default function AdminStudentsPage() {
 
       {/* History Modal Drawer */}
       {historyStudent && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-2xl w-full space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#faedd7] border-2 border-[#064E3B] rounded-2xl p-6 max-w-2xl w-full space-y-4 shadow-2xl text-[#064E3B]">
+            <div className="flex items-center justify-between border-b-2 border-[#064E3B]/15 pb-3">
               <div>
-                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Student History: {historyStudent.rollNumber}</h3>
-                <p className="text-xs text-slate-400">{historyStudent.fullName} • {historyStudent.branch}</p>
+                <h3 className="text-sm font-black text-[#064E3B] uppercase tracking-wider">Student History: {historyStudent.rollNumber}</h3>
+                <p className="text-xs text-[#064E3B]/80 font-semibold">{historyStudent.fullName} • {historyStudent.branch}</p>
               </div>
-              <button onClick={() => setHistoryStudent(null)} className="text-slate-400 hover:text-white">
+              <button onClick={() => setHistoryStudent(null)} className="text-[#064E3B]/70 hover:text-[#064E3B]">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="space-y-3 max-h-[350px] overflow-y-auto">
               {historyLoading ? (
-                <p className="text-xs text-slate-500 text-center py-6">Loading student history...</p>
+                <p className="text-xs text-[#064E3B]/60 text-center py-6 font-bold">Loading student history...</p>
               ) : historyData.length === 0 ? (
-                <p className="text-xs text-slate-500 text-center py-6">No exam attempts recorded for this student.</p>
+                <p className="text-xs text-[#064E3B]/60 text-center py-6 font-bold">No exam attempts recorded for this student.</p>
               ) : (
                 historyData.map((h, i) => (
-                  <div key={i} className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between text-xs">
+                  <div key={i} className="p-3.5 rounded-xl bg-[#fffdf9] border-2 border-[#064E3B]/20 flex items-center justify-between text-xs text-[#064E3B]">
                     <div>
-                      <h4 className="font-bold text-white">{h.examTitle}</h4>
-                      <p className="text-[10px] text-slate-400">
-                        Status: <span className="text-slate-200">{h.status}</span> | Fullscreen Exits: {h.fullscreenExits} | Tab Switches: {h.tabSwitches}
+                      <h4 className="font-black text-[#064E3B]">{h.examTitle}</h4>
+                      <p className="text-[10px] text-[#064E3B]/80 font-semibold mt-0.5">
+                        Status: <span className="font-black text-[#064E3B]">{h.status}</span> | Fullscreen Exits: {h.fullscreenExits} | Tab Switches: {h.tabSwitches}
                       </p>
                     </div>
                     <div className="text-right font-mono">
-                      <span className="font-bold text-emerald-400 text-sm">{h.score} / {h.totalMarks}</span>
-                      <span className="block text-[10px] text-slate-500">{h.percentage}%</span>
+                      <span className="font-black text-[#064E3B] text-sm">{h.score} / {h.totalMarks}</span>
+                      <span className="block text-[10px] text-[#064E3B]/70 font-bold">{h.percentage}%</span>
                     </div>
                   </div>
                 ))

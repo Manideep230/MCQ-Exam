@@ -45,37 +45,37 @@ export default function FirstLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative">
+    <div className="min-h-screen bg-[#f8e7c9] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative">
       <div className="sm:mx-auto sm:w-full sm:max-w-lg z-10">
         <div className="flex justify-center items-center mb-3">
-          <div className="w-14 h-14 rounded-2xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
+          <div className="w-14 h-14 rounded-2xl bg-[#faedd7] border-2 border-[#064E3B]/30 flex items-center justify-center text-[#064E3B] shadow-sm">
             <UserCheck className="w-8 h-8" />
           </div>
         </div>
-        <h2 className="text-center text-3xl font-extrabold text-white tracking-tight">
+        <h2 className="text-center text-3xl font-black text-[#064E3B] tracking-tight">
           Complete Your Student Profile
         </h2>
-        <p className="mt-2 text-center text-sm text-slate-400">
+        <p className="mt-2 text-center text-sm text-[#064E3B]/80 font-medium">
           Welcome to the AI Exam Portal! Please verify your official details before proceeding to your examination dashboard.
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-lg z-10">
-        <div className="bg-slate-900 border border-slate-800 py-8 px-6 shadow-2xl rounded-2xl sm:px-10">
+        <div className="bg-[#fffdf9] border-2 border-[#064E3B]/25 py-8 px-6 shadow-xl rounded-2xl sm:px-10">
           {error && (
-            <div className="mb-6 p-4 rounded-xl bg-red-950/60 border border-red-800/80 flex items-start space-x-3 text-red-300 text-sm">
-              <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+            <div className="mb-6 p-4 rounded-xl bg-red-100 border border-red-300 flex items-start space-x-3 text-red-900 text-sm">
+              <AlertCircle className="w-5 h-5 text-red-700 shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+              <label className="block text-xs font-black text-[#064E3B] uppercase tracking-wider mb-2">
                 FULL NAME
               </label>
               <div className="relative rounded-xl">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#064E3B]/60">
                   <User className="h-5 w-5" />
                 </div>
                 <input
@@ -84,17 +84,17 @@ export default function FirstLoginPage() {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="e.g. Ramesh Kumar"
-                  className="block w-full pl-11 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
+                  className="block w-full pl-11 pr-4 py-3 bg-[#faedd7] border border-[#064E3B]/30 rounded-xl text-[#064E3B] font-semibold placeholder-[#064E3B]/50 focus:outline-none focus:ring-2 focus:ring-[#064E3B] focus:border-transparent text-sm transition-all"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+              <label className="block text-xs font-black text-[#064E3B] uppercase tracking-wider mb-2">
                 BRANCH / DEPARTMENT
               </label>
               <div className="relative rounded-xl">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#064E3B]/60">
                   <BookOpen className="h-5 w-5" />
                 </div>
                 <input
@@ -103,17 +103,17 @@ export default function FirstLoginPage() {
                   value={branch}
                   onChange={(e) => setBranch(e.target.value)}
                   placeholder="e.g. Computer Science & Engineering"
-                  className="block w-full pl-11 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
+                  className="block w-full pl-11 pr-4 py-3 bg-[#faedd7] border border-[#064E3B]/30 rounded-xl text-[#064E3B] font-semibold placeholder-[#064E3B]/50 focus:outline-none focus:ring-2 focus:ring-[#064E3B] focus:border-transparent text-sm transition-all"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+              <label className="block text-xs font-black text-[#064E3B] uppercase tracking-wider mb-2">
                 COLLEGE NAME
               </label>
               <div className="relative rounded-xl">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#064E3B]/60">
                   <Building2 className="h-5 w-5" />
                 </div>
                 <input
@@ -122,7 +122,7 @@ export default function FirstLoginPage() {
                   value={collegeName}
                   onChange={(e) => setCollegeName(e.target.value)}
                   placeholder="e.g. National Institute of Technology"
-                  className="block w-full pl-11 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
+                  className="block w-full pl-11 pr-4 py-3 bg-[#faedd7] border border-[#064E3B]/30 rounded-xl text-[#064E3B] font-semibold placeholder-[#064E3B]/50 focus:outline-none focus:ring-2 focus:ring-[#064E3B] focus:border-transparent text-sm transition-all"
                 />
               </div>
             </div>
@@ -130,7 +130,7 @@ export default function FirstLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center space-x-2 py-3.5 px-4 border border-transparent rounded-xl shadow-lg text-sm font-bold text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all disabled:opacity-50 mt-4"
+              className="w-full flex items-center justify-center space-x-2 py-3.5 px-4 border border-[#064E3B] rounded-xl shadow-md text-sm font-black text-[#f8e7c9] bg-[#064E3B] hover:bg-[#064E3B]/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#064E3B] transition-all disabled:opacity-50 mt-4"
             >
               <span>{loading ? 'SAVING PROFILE...' : 'SAVE & CONTINUE'}</span>
               <ArrowRight className="w-4 h-4" />
