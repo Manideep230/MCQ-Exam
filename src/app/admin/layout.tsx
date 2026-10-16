@@ -28,39 +28,37 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   return (
-    <div className="min-h-screen bg-[#021f18] text-[#faeed9] flex flex-col md:flex-row">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row">
       
       {/* Mobile Top Navbar */}
-      <div className="md:hidden bg-[#03261d] border-b border-[#064E3B] p-4 flex items-center justify-between sticky top-0 z-40">
+      <div className="md:hidden bg-slate-900 border-b border-slate-800 p-4 flex items-center justify-between sticky top-0 z-40">
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 rounded-lg bg-[#064E3B] border border-[#f8e7c9]/30 flex items-center justify-center">
-            <Shield className="w-5 h-5 text-[#f8e7c9]" />
+          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
+            <Shield className="w-5 h-5 text-white" />
           </div>
-          <span className="font-bold text-sm text-[#f8e7c9] tracking-wide">AI EXAM ADMIN</span>
+          <span className="font-bold text-sm text-white tracking-wide">AI EXAM ADMIN</span>
         </div>
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="p-2 text-[#c7b89f] hover:text-[#f8e7c9]"
+          className="p-2 text-slate-400 hover:text-white"
         >
           {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </div>
 
       {/* Sidebar Navigation */}
-      <aside className={`fixed md:static inset-y-0 left-0 z-40 w-64 bg-[#03261d] border-r border-[#064E3B] flex flex-col justify-between transition-transform duration-200 ease-in-out ${
+      <aside className={`fixed md:static inset-y-0 left-0 z-40 w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between transition-transform duration-200 ease-in-out ${
         mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
       }`}>
         <div className="p-6 space-y-8">
           {/* Logo Header */}
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-[#064E3B] border border-[#f8e7c9]/30 flex items-center justify-center shadow-lg shadow-[#064E3B]/40">
-              <Shield className="w-6 h-6 text-[#f8e7c9]" />
+            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/30">
+              <Shield className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="font-extrabold text-sm text-[#f8e7c9] tracking-wider">AI EXAM PORTAL</h2>
-              <span className="text-[10px] text-[#f8e7c9] font-bold uppercase tracking-widest bg-[#064E3B] px-1.5 py-0.5 rounded border border-[#f8e7c9]/20">
-                ADMIN PANEL
-              </span>
+              <h2 className="font-extrabold text-sm text-white tracking-wider">AI EXAM PORTAL</h2>
+              <span className="text-[10px] text-blue-400 font-bold uppercase tracking-widest">ADMIN PANEL</span>
             </div>
           </div>
 
@@ -76,8 +74,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   onClick={() => setMobileOpen(false)}
                   className={`flex items-center space-x-3 px-4 py-3 rounded-xl text-xs font-bold transition-all ${
                     isActive
-                      ? 'bg-[#f8e7c9] text-[#064E3B] font-extrabold shadow-lg shadow-[#f8e7c9]/20'
-                      : 'text-[#c7b89f] hover:text-[#f8e7c9] hover:bg-[#064E3B]/40'
+                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20'
+                      : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/60'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -89,10 +87,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
 
         {/* Footer Logout */}
-        <div className="p-4 border-t border-[#064E3B]">
+        <div className="p-4 border-t border-slate-800">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center space-x-2 py-2.5 px-4 rounded-xl bg-[#021f18] hover:bg-[#064E3B] text-[#faeed9] text-xs font-bold border border-[#064E3B] transition-all"
+            className="w-full flex items-center justify-center space-x-2 py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold border border-slate-700 transition-all"
           >
             <LogOut className="w-4 h-4" />
             <span>Logout Administrator</span>
@@ -101,7 +99,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 min-w-0 overflow-auto bg-[#021f18]">
+      <div className="flex-1 min-w-0 overflow-auto">
         <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-8">
           {children}
         </main>
