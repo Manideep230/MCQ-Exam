@@ -551,7 +551,7 @@ export default function ExamPlayPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-300 text-sm">
+      <div className="min-h-screen bg-[#f8e7c9] flex items-center justify-center text-[#064E3B] text-sm font-black">
         Initializing secure examination session...
       </div>
     );
@@ -559,14 +559,14 @@ export default function ExamPlayPage() {
 
   if (errorMsg && !questions.length) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4">
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-md text-center space-y-4">
-          <AlertOctagon className="w-12 h-12 text-red-500 mx-auto" />
-          <h2 className="text-lg font-bold text-white">Examination Session Error</h2>
-          <p className="text-xs text-slate-400">{errorMsg}</p>
+      <div className="min-h-screen bg-[#f8e7c9] flex flex-col items-center justify-center p-4">
+        <div className="bg-[#faedd7] border-2 border-[#064E3B]/25 rounded-2xl p-6 max-w-md text-center space-y-4 shadow-xl">
+          <AlertOctagon className="w-12 h-12 text-red-600 mx-auto" />
+          <h2 className="text-lg font-black text-[#064E3B]">Examination Session Error</h2>
+          <p className="text-xs text-[#064E3B]/80 font-semibold">{errorMsg}</p>
           <button
             onClick={() => router.push('/student/dashboard')}
-            className="w-full py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-semibold"
+            className="w-full py-2.5 px-4 bg-[#064E3B] hover:bg-[#04382b] text-[#f8e7c9] rounded-xl text-xs font-black"
           >
             Return to Dashboard
           </button>
@@ -581,16 +581,16 @@ export default function ExamPlayPage() {
   const timeFormatted = `${String(minutesLeft).padStart(2, '0')}:${String(secondsLeft).padStart(2, '0')}`;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col prevent-select">
+    <div className="min-h-screen bg-[#f8e7c9] text-[#064E3B] flex flex-col prevent-select">
       
       {/* 1. Header Bar */}
-      <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-30 shadow-md">
+      <header className="bg-[#faedd7] border-b-2 border-[#064E3B]/20 sticky top-0 z-30 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <span className="text-xs font-bold text-blue-400 uppercase tracking-widest hidden sm:inline">
+            <span className="text-xs font-black text-[#064E3B] uppercase tracking-widest hidden sm:inline">
               ONLINE EXAM
             </span>
-            <span className="text-sm font-bold text-white truncate max-w-[150px] sm:max-w-xs">
+            <span className="text-sm font-black text-[#064E3B] truncate max-w-[150px] sm:max-w-xs">
               {exam?.title}
             </span>
           </div>
@@ -598,29 +598,29 @@ export default function ExamPlayPage() {
           <div className="flex items-center space-x-4">
             {/* Connection Status */}
             {!isOnline && (
-              <span className="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-red-950 text-red-400 border border-red-800 text-[10px] font-bold">
+              <span className="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-red-100 text-red-800 border border-red-300 text-[10px] font-black">
                 <WifiOff className="w-3 h-3" />
                 <span>Reconnecting...</span>
               </span>
             )}
 
             {/* Countdown Timer */}
-            <div className={`flex items-center space-x-2 px-3 py-1.5 rounded-xl border text-xs font-mono font-bold ${
+            <div className={`flex items-center space-x-2 px-3 py-1.5 rounded-xl border-2 text-xs font-mono font-black ${
               remainingSeconds <= 300 
-                ? 'bg-red-950/80 text-red-400 border-red-800 animate-pulse' 
-                : 'bg-slate-950 text-emerald-400 border-slate-800'
+                ? 'bg-red-100 text-red-800 border-red-400 animate-pulse' 
+                : 'bg-[#fffdf9] text-[#064E3B] border-[#064E3B]/20'
             }`}>
               <Clock className="w-4 h-4" />
               <span>{timeFormatted}</span>
             </div>
 
             {/* Proctoring Warning Badge */}
-            <div className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border text-xs font-mono font-bold ${
+            <div className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border-2 text-xs font-mono font-black ${
               alertCount === 0
-                ? 'bg-emerald-950/60 text-emerald-400 border-emerald-800'
+                ? 'bg-[#fffdf9] text-[#064E3B] border-[#064E3B]/20'
                 : alertCount === 1
-                ? 'bg-amber-950/80 text-amber-400 border-amber-800'
-                : 'bg-red-950/90 text-red-400 border-red-800 animate-pulse'
+                ? 'bg-amber-100 text-amber-900 border-amber-300'
+                : 'bg-red-100 text-red-800 border-red-400 animate-pulse'
             }`}>
               <ShieldAlert className="w-4 h-4" />
               <span>Alerts: {alertCount} / 3</span>
@@ -629,7 +629,7 @@ export default function ExamPlayPage() {
             {/* Finish Exam Button */}
             <button
               onClick={handleManualSubmit}
-              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md flex items-center space-x-1.5"
+              className="px-4 py-2 rounded-xl bg-[#064E3B] hover:bg-[#04382b] text-[#f8e7c9] font-black text-xs uppercase tracking-wider transition-all shadow-md flex items-center space-x-1.5 border-2 border-[#064E3B]"
             >
               <Send className="w-3.5 h-3.5" />
               <span>SUBMIT EXAM</span>
@@ -645,34 +645,34 @@ export default function ExamPlayPage() {
         <div className="lg:col-span-3 space-y-6">
           
           {errorMsg && (
-            <div className="p-4 rounded-xl bg-red-950/70 border border-red-800 text-red-300 text-xs flex items-center space-x-3">
-              <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+            <div className="p-4 rounded-xl bg-red-100 border-2 border-red-400 text-red-900 text-xs flex items-center space-x-3 font-semibold">
+              <AlertCircle className="w-4 h-4 text-red-700 shrink-0" />
               <span>{errorMsg}</span>
             </div>
           )}
 
           {currentQuestion && (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-6 shadow-xl">
+            <div className="bg-[#fffdf9] border-2 border-[#064E3B]/20 rounded-2xl p-6 space-y-6 shadow-sm">
               
               {/* Question Header */}
-              <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+              <div className="flex items-center justify-between border-b-2 border-[#064E3B]/10 pb-4">
                 <div className="flex items-center space-x-2">
-                  <span className="px-3 py-1 rounded-lg bg-blue-950 text-blue-400 border border-blue-800 text-xs font-bold font-mono">
+                  <span className="px-3 py-1 rounded-lg bg-[#faedd7] text-[#064E3B] border border-[#064E3B]/30 text-xs font-black font-mono">
                     Question {currentIndex + 1} of {questions.length}
                   </span>
-                  <span className="text-xs text-slate-400 font-semibold">({currentQuestion.marks} Mark)</span>
+                  <span className="text-xs text-[#064E3B]/70 font-bold">({currentQuestion.marks} Mark)</span>
                 </div>
 
                 {/* Auto-save status */}
-                <div className="text-xs text-slate-400 flex items-center space-x-1.5">
-                  {savingStatus === 'saving' && <span className="text-amber-400 font-medium animate-pulse">Saving answer...</span>}
-                  {savingStatus === 'saved' && <span className="text-emerald-400 font-medium flex items-center space-x-1"><CheckCircle className="w-3.5 h-3.5" /> Saved</span>}
-                  {currentAnswer?.saved && savingStatus === 'idle' && <span className="text-slate-500 font-medium">Saved</span>}
+                <div className="text-xs text-[#064E3B]/70 flex items-center space-x-1.5 font-bold">
+                  {savingStatus === 'saving' && <span className="text-amber-700 font-black animate-pulse">Saving answer...</span>}
+                  {savingStatus === 'saved' && <span className="text-[#064E3B] font-black flex items-center space-x-1"><CheckCircle className="w-3.5 h-3.5" /> Saved</span>}
+                  {currentAnswer?.saved && savingStatus === 'idle' && <span className="text-[#064E3B]/60 font-semibold">Saved</span>}
                 </div>
               </div>
 
               {/* Question Text */}
-              <div className="text-sm sm:text-base font-semibold text-slate-100 leading-relaxed whitespace-pre-line">
+              <div className="text-sm sm:text-base font-bold text-[#064E3B] leading-relaxed whitespace-pre-line">
                 {currentQuestion.questionText}
               </div>
 
@@ -684,18 +684,18 @@ export default function ExamPlayPage() {
                     <button
                       key={opt.optionKey}
                       onClick={() => handleOptionSelect(opt.optionKey)}
-                      className={`w-full text-left p-4 rounded-xl border transition-all flex items-start space-x-3.5 ${
+                      className={`w-full text-left p-4 rounded-xl border-2 transition-all flex items-start space-x-3.5 ${
                         isSelected
-                          ? 'bg-blue-950/60 border-blue-500 text-white shadow-md shadow-blue-950'
-                          : 'bg-slate-950/60 border-slate-800/80 text-slate-300 hover:border-slate-700 hover:bg-slate-950'
+                          ? 'bg-[#faedd7] border-[#064E3B] text-[#064E3B] shadow-sm'
+                          : 'bg-[#fffdf9] border-[#064E3B]/20 text-[#064E3B] hover:border-[#064E3B]/50 hover:bg-[#faedd7]/30'
                       }`}
                     >
-                      <div className={`w-6 h-6 rounded-full border flex items-center justify-center shrink-0 mt-0.5 font-mono text-xs font-bold transition-all ${
-                        isSelected ? 'bg-blue-600 border-blue-500 text-white' : 'border-slate-700 text-slate-400'
+                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 font-mono text-xs font-black transition-all ${
+                        isSelected ? 'bg-[#064E3B] border-[#064E3B] text-[#f8e7c9]' : 'border-[#064E3B]/40 text-[#064E3B]'
                       }`}>
                         {opt.optionKey}
                       </div>
-                      <div className="text-xs sm:text-sm font-medium leading-relaxed">
+                      <div className="text-xs sm:text-sm font-semibold leading-relaxed">
                         {opt.optionText}
                       </div>
                     </button>
@@ -704,11 +704,11 @@ export default function ExamPlayPage() {
               </div>
 
               {/* Action Buttons */}
-              <div className="pt-4 flex items-center justify-between border-t border-slate-800/80">
+              <div className="pt-4 flex items-center justify-between border-t-2 border-[#064E3B]/10">
                 <button
                   disabled={currentIndex === 0 || !exam?.allowBackNav}
                   onClick={handlePrevious}
-                  className="px-4 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 font-bold text-xs uppercase tracking-wider disabled:opacity-30 disabled:cursor-not-allowed flex items-center space-x-1.5 transition-all"
+                  className="px-4 py-2.5 rounded-xl bg-[#faedd7] hover:bg-[#f3deba] border-2 border-[#064E3B]/30 text-[#064E3B] font-black text-xs uppercase tracking-wider disabled:opacity-30 disabled:cursor-not-allowed flex items-center space-x-1.5 transition-all"
                 >
                   <ChevronLeft className="w-4 h-4" />
                   <span>PREVIOUS</span>
@@ -716,7 +716,7 @@ export default function ExamPlayPage() {
 
                 <button
                   onClick={handleNext}
-                  className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-blue-600/30 flex items-center space-x-1.5 transition-all"
+                  className="px-6 py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#04382b] text-[#f8e7c9] font-black text-xs uppercase tracking-wider shadow-md flex items-center space-x-1.5 transition-all border-2 border-[#064E3B]"
                 >
                   <span>SAVE & NEXT</span>
                   <ChevronRight className="w-4 h-4" />
@@ -729,24 +729,24 @@ export default function ExamPlayPage() {
 
         {/* Right Column: Question Navigator Sidebar */}
         <div className="space-y-6">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 shadow-xl">
-            <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-between justify-between">
+          <div className="bg-[#faedd7] border-2 border-[#064E3B]/25 rounded-2xl p-5 space-y-4 shadow-sm">
+            <h3 className="text-xs font-black text-[#064E3B] uppercase tracking-wider flex items-center justify-between">
               <span>Question Navigator</span>
-              <span className="text-blue-400 font-mono">{answeredCount} / {questions.length}</span>
+              <span className="text-[#064E3B] font-mono font-black">{answeredCount} / {questions.length}</span>
             </h3>
 
             {/* Status Legend */}
-            <div className="grid grid-cols-3 gap-1.5 text-[9px] font-medium text-slate-400 pt-1">
+            <div className="grid grid-cols-3 gap-1.5 text-[9px] font-bold text-[#064E3B]/80 pt-1">
               <div className="flex items-center space-x-1">
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                <span className="w-2 h-2 rounded-full bg-[#064E3B]" />
                 <span>Saved</span>
               </div>
               <div className="flex items-center space-x-1">
-                <span className="w-2 h-2 rounded-full bg-amber-400" />
+                <span className="w-2 h-2 rounded-full bg-amber-500" />
                 <span>Syncing</span>
               </div>
               <div className="flex items-center space-x-1">
-                <span className="w-2 h-2 rounded-full bg-slate-700" />
+                <span className="w-2 h-2 rounded-full bg-[#faedd7] border border-[#064E3B]/40" />
                 <span>Empty</span>
               </div>
             </div>
@@ -763,31 +763,31 @@ export default function ExamPlayPage() {
                   <button
                     key={q.id}
                     onClick={() => handleNavigateQuestion(idx)}
-                    className={`h-9 rounded-lg font-mono text-xs font-bold transition-all flex items-center justify-center relative ${
+                    className={`h-9 rounded-lg font-mono text-xs font-black transition-all flex items-center justify-center relative border-2 ${
                       isCurrent
-                        ? 'bg-blue-600 text-white ring-2 ring-blue-400 ring-offset-2 ring-offset-slate-900 shadow-md'
+                        ? 'bg-[#064E3B] text-[#f8e7c9] border-[#064E3B] shadow-md ring-2 ring-[#064E3B]/50'
                         : isAnswered
                         ? isSaved
-                          ? 'bg-emerald-950 text-emerald-300 border border-emerald-800/80 hover:bg-emerald-900'
-                          : 'bg-amber-950 text-amber-300 border border-amber-800/80 hover:bg-amber-900 animate-pulse'
-                        : 'bg-slate-950 text-slate-400 border border-slate-800 hover:border-slate-700'
+                          ? 'bg-[#064E3B]/15 text-[#064E3B] border-[#064E3B]/40 hover:bg-[#064E3B]/25'
+                          : 'bg-amber-100 text-amber-900 border-amber-400 hover:bg-amber-200 animate-pulse'
+                        : 'bg-[#fffdf9] text-[#064E3B]/60 border-[#064E3B]/20 hover:border-[#064E3B]'
                     }`}
                   >
                     {idx + 1}
                     {isAnswered && !isSaved && (
-                      <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-amber-400" />
+                      <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-amber-500" />
                     )}
                   </button>
                 );
               })}
             </div>
 
-            <div className="pt-3 border-t border-slate-800/80">
+            <div className="pt-3 border-t-2 border-[#064E3B]/15">
               <button
                 onClick={handleManualSubmit}
-                className="w-full py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs uppercase tracking-wider border border-slate-700 transition-all flex items-center justify-center space-x-2"
+                className="w-full py-3 px-4 rounded-xl bg-[#064E3B] hover:bg-[#04382b] text-[#f8e7c9] font-black text-xs uppercase tracking-wider border-2 border-[#064E3B] transition-all flex items-center justify-center space-x-2 shadow-md"
               >
-                <Send className="w-3.5 h-3.5 text-emerald-400" />
+                <Send className="w-3.5 h-3.5 text-[#f8e7c9]" />
                 <span>FINISH & SUBMIT EXAM</span>
               </button>
             </div>
@@ -798,17 +798,17 @@ export default function ExamPlayPage() {
 
       {/* Fullscreen Exit & Proctoring Alert Modal */}
       {showWarningModal && (
-        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-slate-900 border-2 border-red-600 rounded-2xl p-6 sm:p-8 max-w-md w-full text-center space-y-5 shadow-2xl">
-            <div className="w-16 h-16 bg-red-950 rounded-2xl border border-red-800 flex items-center justify-center mx-auto text-red-500 animate-pulse">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#faedd7] border-2 border-red-600 rounded-2xl p-6 sm:p-8 max-w-md w-full text-center space-y-5 shadow-2xl text-[#064E3B]">
+            <div className="w-16 h-16 bg-red-100 rounded-2xl border-2 border-red-500 flex items-center justify-center mx-auto text-red-700">
               <ShieldAlert className="w-9 h-9" />
             </div>
             
             <div>
-              <span className="px-3 py-1 rounded-full bg-red-950 text-red-400 border border-red-800 text-[11px] font-mono font-bold uppercase tracking-wider">
+              <span className="px-3 py-1 rounded-full bg-red-100 text-red-800 border border-red-300 text-[11px] font-mono font-black uppercase tracking-wider">
                 {alertCount >= 3 ? 'FINAL VIOLATION (3/3)' : `PROCTORING ALERT (${alertCount}/3)`}
               </span>
-              <h3 className="text-xl font-extrabold text-white mt-2">
+              <h3 className="text-xl font-black text-[#064E3B] mt-2">
                 {alertCount >= 3 ? 'EXAM AUTO-SUBMITTING' : 'SECURITY ALERT DETECTED'}
               </h3>
             </div>
@@ -820,27 +820,27 @@ export default function ExamPlayPage() {
                   key={step}
                   className={`h-2.5 flex-1 rounded-full transition-all ${
                     step <= alertCount
-                      ? 'bg-red-500 shadow-md shadow-red-500/50'
-                      : 'bg-slate-800'
+                      ? 'bg-red-600 shadow-md'
+                      : 'bg-[#064E3B]/20'
                   }`}
                 />
               ))}
             </div>
             
-            <div className="p-3.5 rounded-xl bg-slate-950 border border-red-900/50 text-xs text-red-300 font-medium leading-relaxed text-left space-y-1">
-              <p className="font-bold text-white uppercase text-[10px] tracking-wider text-red-400">Violation Reason:</p>
-              <p className="font-semibold text-slate-200">{warningReason || 'Proctoring Violation'}</p>
-              <p className="text-slate-400 text-[11px] pt-1">{warningMessage}</p>
+            <div className="p-3.5 rounded-xl bg-[#fffdf9] border-2 border-red-400 text-xs text-red-900 font-semibold leading-relaxed text-left space-y-1">
+              <p className="font-black text-red-950 uppercase text-[10px] tracking-wider">Violation Reason:</p>
+              <p className="font-bold text-red-900">{warningReason || 'Proctoring Violation'}</p>
+              <p className="text-red-800 text-[11px] pt-1">{warningMessage}</p>
             </div>
 
             {alertCount >= 3 ? (
-              <div className="py-3.5 px-4 rounded-xl bg-red-950 border border-red-800 text-red-400 font-bold text-xs uppercase tracking-wider flex items-center justify-center space-x-2 animate-pulse">
+              <div className="py-3.5 px-4 rounded-xl bg-red-100 border-2 border-red-500 text-red-900 font-black text-xs uppercase tracking-wider flex items-center justify-center space-x-2 animate-pulse">
                 <span>Auto-submitting examination...</span>
               </div>
             ) : (
               <button
                 onClick={reEnterFullscreen}
-                className="w-full py-3.5 px-4 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-red-600/40 flex items-center justify-center space-x-2 transition-all"
+                className="w-full py-3.5 px-4 rounded-xl bg-red-700 hover:bg-red-800 text-white font-black text-xs uppercase tracking-wider shadow-md flex items-center justify-center space-x-2 transition-all"
               >
                 <Maximize className="w-4 h-4" />
                 <span>I UNDERSTAND & RETURN TO EXAM</span>
@@ -852,26 +852,26 @@ export default function ExamPlayPage() {
 
       {/* Manual Submit Confirmation Modal */}
       {showSubmitModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-md w-full space-y-6 shadow-2xl">
-            <h3 className="text-lg font-bold text-white">Confirm Examination Submission</h3>
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#faedd7] border-2 border-[#064E3B] rounded-2xl p-6 max-w-md w-full space-y-6 shadow-2xl text-[#064E3B]">
+            <h3 className="text-lg font-black text-[#064E3B]">Confirm Examination Submission</h3>
             
-            <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2 text-xs text-slate-300">
+            <div className="p-4 rounded-xl bg-[#fffdf9] border-2 border-[#064E3B]/20 space-y-2 text-xs text-[#064E3B]">
               <div className="flex justify-between">
-                <span>Total Questions:</span>
-                <span className="font-bold text-white">{questions.length}</span>
+                <span className="font-semibold">Total Questions:</span>
+                <span className="font-black text-[#064E3B]">{questions.length}</span>
               </div>
               <div className="flex justify-between">
-                <span>Answered Questions:</span>
-                <span className="font-bold text-emerald-400">{answeredCount}</span>
+                <span className="font-semibold">Answered Questions:</span>
+                <span className="font-black text-[#064E3B]">{answeredCount}</span>
               </div>
               <div className="flex justify-between">
-                <span>Unanswered Questions:</span>
-                <span className="font-bold text-amber-400">{questions.length - answeredCount}</span>
+                <span className="font-semibold">Unanswered Questions:</span>
+                <span className="font-black text-amber-800">{questions.length - answeredCount}</span>
               </div>
             </div>
 
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-[#064E3B]/80 font-medium">
               Are you sure you want to submit your examination? Once submitted, you will not be able to modify your answers.
             </p>
 
@@ -879,7 +879,7 @@ export default function ExamPlayPage() {
               <button
                 disabled={isSubmitting}
                 onClick={() => setShowSubmitModal(false)}
-                className="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs uppercase tracking-wider border border-slate-700"
+                className="flex-1 py-3 rounded-xl bg-[#faedd7] hover:bg-[#f3deba] text-[#064E3B] font-black text-xs uppercase tracking-wider border-2 border-[#064E3B]/30"
               >
                 CANCEL
               </button>
@@ -887,7 +887,7 @@ export default function ExamPlayPage() {
               <button
                 disabled={isSubmitting}
                 onClick={confirmSubmit}
-                className="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-emerald-600/30"
+                className="flex-1 py-3 rounded-xl bg-[#064E3B] hover:bg-[#04382b] text-[#f8e7c9] font-black text-xs uppercase tracking-wider shadow-md border-2 border-[#064E3B]"
               >
                 {isSubmitting ? 'SUBMITTING...' : 'YES, SUBMIT NOW'}
               </button>

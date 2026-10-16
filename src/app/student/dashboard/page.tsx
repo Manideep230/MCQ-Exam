@@ -23,15 +23,13 @@ interface ExamItem {
   startAt: string;
   endAt: string;
   status: 'Upcoming' | 'Available' | 'Completed' | 'Expired' | 'Disabled';
-  attempt: {
-    id: string;
+  attempt?: {
+    attemptId?: string;
+    id?: string;
+    score: number;
+    totalMarks: number;
+    percentage: number;
     status: string;
-    startedAt: string;
-    deadlineAt: string;
-    submittedAt?: string;
-    score?: number;
-    totalMarks?: number;
-    percentage?: number;
   } | null;
 }
 
@@ -89,32 +87,32 @@ export default function StudentDashboard() {
   const completedExams = exams.filter(e => e.status === 'Completed' || e.status === 'Expired');
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-[#f8e7c9] text-[#064E3B] flex flex-col">
       {/* Header Bar */}
-      <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-30">
+      <header className="bg-[#f8e7c9]/95 backdrop-blur-md border-b border-[#064E3B]/20 sticky top-0 z-30 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/30">
-              <GraduationCap className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 rounded-xl bg-[#064E3B] flex items-center justify-center shadow-md shadow-[#064E3B]/20">
+              <GraduationCap className="w-6 h-6 text-[#f8e7c9]" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-white tracking-wide">AI EXAM PORTAL</h1>
-              <p className="text-xs text-slate-400">Student Portal Dashboard</p>
+              <h1 className="text-lg font-black text-[#064E3B] tracking-wide">AI EXAM PORTAL</h1>
+              <p className="text-xs text-[#064E3B]/80 font-medium">Student Portal Dashboard</p>
             </div>
           </div>
 
           <div className="flex items-center space-x-2.5">
             <Link
               href="/student/feedback"
-              className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 text-xs font-bold border border-blue-500/40 transition-all shadow-sm"
+              className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-[#064E3B] hover:bg-[#04382b] text-[#f8e7c9] text-xs font-bold transition-all shadow-sm"
             >
-              <MessageSquare className="w-4 h-4 text-blue-400" />
+              <MessageSquare className="w-4 h-4 text-[#f8e7c9]" />
               <span>Training Feedback</span>
             </Link>
 
             <button
               onClick={handleLogout}
-              className="flex items-center space-x-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition-all"
+              className="flex items-center space-x-2 px-3.5 py-2 rounded-xl bg-[#faedd7] hover:bg-[#f3deba] text-[#064E3B] text-xs font-bold border border-[#064E3B]/30 transition-all"
             >
               <LogOut className="w-4 h-4" />
               <span>Logout</span>
@@ -127,51 +125,51 @@ export default function StudentDashboard() {
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         
         {/* Student Welcome Header Card */}
-        <div className="bg-gradient-to-r from-slate-900 via-slate-900 to-blue-950/50 border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+        <div className="bg-[#faedd7] border-2 border-[#064E3B]/25 rounded-2xl p-6 shadow-xl relative overflow-hidden">
           <div className="relative z-10 grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="md:col-span-2 space-y-1">
-              <span className="text-xs font-bold text-blue-400 uppercase tracking-widest">OFFICIAL STUDENT RECORD</span>
-              <h2 className="text-2xl font-black text-white">
+              <span className="text-xs font-bold text-[#064E3B] uppercase tracking-widest">OFFICIAL STUDENT RECORD</span>
+              <h2 className="text-2xl font-black text-[#064E3B]">
                 Welcome, {user?.fullName || 'Student'}
               </h2>
-              <p className="text-xs text-slate-400">
-                Logged in as <span className="text-white font-mono font-semibold">{user?.rollNumber}</span>
+              <p className="text-xs text-[#064E3B]/80 font-medium">
+                Logged in as <span className="text-[#064E3B] font-mono font-bold">{user?.rollNumber}</span>
               </p>
             </div>
 
-            <div className="bg-slate-950/60 rounded-xl p-3.5 border border-slate-800/80 space-y-1">
-              <span className="text-[10px] font-semibold text-slate-400 uppercase">BRANCH</span>
-              <p className="text-sm font-bold text-slate-200 truncate">{user?.branch || '-'}</p>
+            <div className="bg-[#fffdf9] rounded-xl p-3.5 border border-[#064E3B]/25 space-y-1 shadow-sm">
+              <span className="text-[10px] font-bold text-[#064E3B]/70 uppercase">BRANCH</span>
+              <p className="text-sm font-bold text-[#064E3B] truncate">{user?.branch || '-'}</p>
             </div>
 
-            <div className="bg-slate-950/60 rounded-xl p-3.5 border border-slate-800/80 space-y-1">
-              <span className="text-[10px] font-semibold text-slate-400 uppercase">COLLEGE</span>
-              <p className="text-sm font-bold text-slate-200 truncate">{user?.collegeName || '-'}</p>
+            <div className="bg-[#fffdf9] rounded-xl p-3.5 border border-[#064E3B]/25 space-y-1 shadow-sm">
+              <span className="text-[10px] font-bold text-[#064E3B]/70 uppercase">COLLEGE</span>
+              <p className="text-sm font-bold text-[#064E3B] truncate">{user?.collegeName || '-'}</p>
             </div>
           </div>
         </div>
 
         {/* FSI Training Feedback Action Banner */}
-        <div className="bg-gradient-to-r from-indigo-950/60 via-slate-900 to-blue-950/60 border border-blue-800/60 rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="bg-[#faedd7] border-2 border-[#064E3B]/30 rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1.5">
             <div className="flex items-center space-x-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-blue-900/60 text-blue-300 border border-blue-700/60 text-[10px] font-bold uppercase tracking-wider flex items-center space-x-1">
-                <Sparkles className="w-3 h-3 text-blue-400" />
+              <span className="px-2.5 py-0.5 rounded-full bg-[#064E3B] text-[#f8e7c9] text-[10px] font-bold uppercase tracking-wider flex items-center space-x-1 shadow-sm">
+                <Sparkles className="w-3 h-3 text-[#f8e7c9]" />
                 <span>STUDENT ACTION REQUIRED</span>
               </span>
-              <span className="text-xs text-slate-400 font-semibold">GMRIT — Final Year (ECE & EEE)</span>
+              <span className="text-xs text-[#064E3B] font-bold">GMRIT — Final Year (ECE & EEE)</span>
             </div>
-            <h3 className="text-lg font-bold text-white tracking-wide">
+            <h3 className="text-lg font-black text-[#064E3B] tracking-wide">
               FSI Technical Training — Student Feedback Form
             </h3>
-            <p className="text-xs text-slate-400 max-w-2xl leading-relaxed">
+            <p className="text-xs text-[#064E3B]/80 max-w-2xl leading-relaxed font-medium">
               Please provide your honest evaluation regarding training methodology, technical domains (IoT, IIoT, MongoDB, Python, Edge AI, Neural Networks), and project planning.
             </p>
           </div>
 
           <Link
             href="/student/feedback"
-            className="px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center space-x-2 shrink-0 shadow-lg shadow-blue-600/30 transition-all"
+            className="px-5 py-3 rounded-xl bg-[#064E3B] hover:bg-[#04382b] text-[#f8e7c9] font-extrabold text-xs uppercase tracking-wider flex items-center justify-center space-x-2 shrink-0 shadow-lg shadow-[#064E3B]/20 transition-all"
           >
             <MessageSquare className="w-4 h-4" />
             <span>Open Feedback Form</span>
@@ -179,20 +177,20 @@ export default function StudentDashboard() {
         </div>
 
         {error && (
-          <div className="p-4 rounded-xl bg-red-950/60 border border-red-800 text-red-300 text-sm flex items-center space-x-3">
-            <AlertCircle className="w-5 h-5 text-red-400" />
-            <span>{error}</span>
+          <div className="p-4 rounded-xl bg-red-100 border border-red-300 text-red-800 text-sm flex items-center space-x-3">
+            <AlertCircle className="w-5 h-5 text-red-600" />
+            <span className="font-semibold">{error}</span>
           </div>
         )}
 
         {/* Exams Section */}
         <div className="space-y-6">
           {/* Tab Navigation */}
-          <div className="flex border-b border-slate-800 space-x-8 text-sm font-semibold">
+          <div className="flex border-b-2 border-[#064E3B]/20 space-x-8 text-sm font-bold">
             <button
               onClick={() => setActiveTab('available')}
               className={`pb-3 flex items-center space-x-2 transition-all relative ${
-                activeTab === 'available' ? 'text-blue-400 border-b-2 border-blue-500' : 'text-slate-400 hover:text-slate-200'
+                activeTab === 'available' ? 'text-[#064E3B] border-b-2 border-[#064E3B] font-black' : 'text-[#064E3B]/60 hover:text-[#064E3B]'
               }`}
             >
               <PlayCircle className="w-4 h-4" />
@@ -202,7 +200,7 @@ export default function StudentDashboard() {
             <button
               onClick={() => setActiveTab('upcoming')}
               className={`pb-3 flex items-center space-x-2 transition-all relative ${
-                activeTab === 'upcoming' ? 'text-blue-400 border-b-2 border-blue-500' : 'text-slate-400 hover:text-slate-200'
+                activeTab === 'upcoming' ? 'text-[#064E3B] border-b-2 border-[#064E3B] font-black' : 'text-[#064E3B]/60 hover:text-[#064E3B]'
               }`}
             >
               <Clock className="w-4 h-4" />
@@ -212,7 +210,7 @@ export default function StudentDashboard() {
             <button
               onClick={() => setActiveTab('completed')}
               className={`pb-3 flex items-center space-x-2 transition-all relative ${
-                activeTab === 'completed' ? 'text-blue-400 border-b-2 border-blue-500' : 'text-slate-400 hover:text-slate-200'
+                activeTab === 'completed' ? 'text-[#064E3B] border-b-2 border-[#064E3B] font-black' : 'text-[#064E3B]/60 hover:text-[#064E3B]'
               }`}
             >
               <CheckCircle2 className="w-4 h-4" />
@@ -222,12 +220,12 @@ export default function StudentDashboard() {
 
           {/* Exam Grid */}
           {loading ? (
-            <div className="py-12 text-center text-slate-500 text-sm">Loading examination schedules...</div>
+            <div className="py-12 text-center text-[#064E3B]/70 font-semibold text-sm">Loading examination schedules...</div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {activeTab === 'available' && (
                 availableExams.length === 0 ? (
-                  <div className="col-span-full py-12 text-center bg-slate-900/40 rounded-2xl border border-slate-800/60 text-slate-400 text-sm">
+                  <div className="col-span-full py-12 text-center bg-[#faedd7] rounded-2xl border border-[#064E3B]/20 text-[#064E3B] font-medium text-sm">
                     No active examinations available right now.
                   </div>
                 ) : (
@@ -239,7 +237,7 @@ export default function StudentDashboard() {
 
               {activeTab === 'upcoming' && (
                 upcomingExams.length === 0 ? (
-                  <div className="col-span-full py-12 text-center bg-slate-900/40 rounded-2xl border border-slate-800/60 text-slate-400 text-sm">
+                  <div className="col-span-full py-12 text-center bg-[#faedd7] rounded-2xl border border-[#064E3B]/20 text-[#064E3B] font-medium text-sm">
                     No upcoming examinations scheduled.
                   </div>
                 ) : (
@@ -251,7 +249,7 @@ export default function StudentDashboard() {
 
               {activeTab === 'completed' && (
                 completedExams.length === 0 ? (
-                  <div className="col-span-full py-12 text-center bg-slate-900/40 rounded-2xl border border-slate-800/60 text-slate-400 text-sm">
+                  <div className="col-span-full py-12 text-center bg-[#faedd7] rounded-2xl border border-[#064E3B]/20 text-[#064E3B] font-medium text-sm">
                     No completed examinations recorded yet.
                   </div>
                 ) : (
@@ -273,60 +271,60 @@ function ExamCard({ exam, onStart, onResult }: { exam: ExamItem; onStart?: () =>
   const endDate = new Date(exam.endAt);
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-5 flex flex-col justify-between hover:border-slate-700 transition-all shadow-lg">
+    <div className="bg-[#faedd7] border-2 border-[#064E3B]/25 rounded-2xl p-6 space-y-5 flex flex-col justify-between hover:border-[#064E3B]/50 transition-all shadow-xl">
       <div className="space-y-3">
         <div className="flex items-start justify-between">
           <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-            exam.status === 'Available' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' :
-            exam.status === 'Upcoming' ? 'bg-amber-950 text-amber-400 border border-amber-800' :
-            exam.status === 'Completed' ? 'bg-blue-950 text-blue-400 border border-blue-800' :
-            exam.status === 'Disabled' ? 'bg-red-950 text-red-400 border border-red-800' :
-            'bg-slate-800 text-slate-400'
+            exam.status === 'Available' ? 'bg-[#064E3B] text-[#f8e7c9]' :
+            exam.status === 'Upcoming' ? 'bg-amber-600 text-white' :
+            exam.status === 'Completed' ? 'bg-[#047857] text-white' :
+            exam.status === 'Disabled' ? 'bg-red-700 text-white' :
+            'bg-[#d4b98c] text-[#064E3B]'
           }`}>
             {exam.status}
           </span>
-          <span className="text-xs font-mono text-slate-400 font-semibold">{exam.durationMinutes} mins</span>
+          <span className="text-xs font-mono text-[#064E3B] font-bold">{exam.durationMinutes} mins</span>
         </div>
 
-        <h3 className="text-lg font-bold text-white leading-snug">{exam.title}</h3>
-        <p className="text-xs text-slate-400 line-clamp-2">{exam.description || 'No description provided.'}</p>
+        <h3 className="text-lg font-black text-[#064E3B] leading-snug">{exam.title}</h3>
+        <p className="text-xs text-[#064E3B]/80 font-medium line-clamp-2">{exam.description || 'No description provided.'}</p>
       </div>
 
-      <div className="space-y-3 pt-2 border-t border-slate-800/80 text-xs text-slate-300">
+      <div className="space-y-3 pt-2 border-t border-[#064E3B]/20 text-xs text-[#064E3B]">
         <div className="flex items-center justify-between">
-          <span className="flex items-center space-x-1.5 text-slate-400">
-            <HelpCircle className="w-3.5 h-3.5 text-blue-400" />
+          <span className="flex items-center space-x-1.5 text-[#064E3B]/70 font-semibold">
+            <HelpCircle className="w-3.5 h-3.5 text-[#064E3B]" />
             <span>Questions:</span>
           </span>
-          <span className="font-semibold text-white">{exam.questionCount} Questions</span>
+          <span className="font-extrabold text-[#064E3B]">{exam.questionCount} Questions</span>
         </div>
 
         {exam.status === 'Completed' && exam.attempt?.score !== undefined ? (
-          <div className="flex items-center justify-between p-2.5 rounded-xl bg-blue-950/60 border border-blue-800/80">
-            <span className="flex items-center space-x-1.5 text-blue-300 font-bold">
-              <Award className="w-4 h-4 text-amber-400" />
+          <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#fffdf9] border border-[#064E3B]/30">
+            <span className="flex items-center space-x-1.5 text-[#064E3B] font-extrabold">
+              <Award className="w-4 h-4 text-[#064E3B]" />
               <span>Your Score:</span>
             </span>
-            <span className="font-mono text-sm font-black text-white">
+            <span className="font-mono text-sm font-black text-[#064E3B]">
               {exam.attempt.score} / {exam.attempt.totalMarks || exam.totalMarks} ({exam.attempt.percentage}%)
             </span>
           </div>
         ) : (
           <div className="flex items-center justify-between">
-            <span className="flex items-center space-x-1.5 text-slate-400">
-              <Award className="w-3.5 h-3.5 text-amber-400" />
+            <span className="flex items-center space-x-1.5 text-[#064E3B]/70 font-semibold">
+              <Award className="w-3.5 h-3.5 text-[#064E3B]" />
               <span>Total Marks:</span>
             </span>
-            <span className="font-semibold text-white">{exam.totalMarks} Marks</span>
+            <span className="font-extrabold text-[#064E3B]">{exam.totalMarks} Marks</span>
           </div>
         )}
 
         <div className="flex items-center justify-between">
-          <span className="flex items-center space-x-1.5 text-slate-400">
-            <Calendar className="w-3.5 h-3.5 text-emerald-400" />
+          <span className="flex items-center space-x-1.5 text-[#064E3B]/70 font-semibold">
+            <Calendar className="w-3.5 h-3.5 text-[#064E3B]" />
             <span>Window:</span>
           </span>
-          <span className="font-mono text-[11px] text-slate-300">
+          <span className="font-mono text-[11px] text-[#064E3B] font-semibold">
             {startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {endDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>
         </div>
@@ -336,7 +334,7 @@ function ExamCard({ exam, onStart, onResult }: { exam: ExamItem; onStart?: () =>
         {exam.status === 'Available' && (
           <button
             onClick={onStart}
-            className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center space-x-2 shadow-lg shadow-blue-600/30"
+            className="w-full py-3 px-4 rounded-xl bg-[#064E3B] hover:bg-[#04382b] text-[#f8e7c9] font-extrabold text-xs uppercase tracking-wider transition-all flex items-center justify-center space-x-2 shadow-lg shadow-[#064E3B]/20"
           >
             <PlayCircle className="w-4 h-4" />
             <span>{exam.attempt?.status === 'in_progress' ? 'RESUME EXAM' : 'START EXAM'}</span>
@@ -344,8 +342,8 @@ function ExamCard({ exam, onStart, onResult }: { exam: ExamItem; onStart?: () =>
         )}
 
         {exam.status === 'Upcoming' && (
-          <div className="w-full py-3 px-4 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 font-semibold text-xs text-center flex items-center justify-center space-x-2">
-            <Lock className="w-4 h-4" />
+          <div className="w-full py-3 px-4 rounded-xl bg-[#fffdf9] border border-[#064E3B]/30 text-[#064E3B]/70 font-bold text-xs text-center flex items-center justify-center space-x-2">
+            <Lock className="w-3.5 h-3.5" />
             <span>STARTS AT {startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
           </div>
         )}
@@ -353,9 +351,9 @@ function ExamCard({ exam, onStart, onResult }: { exam: ExamItem; onStart?: () =>
         {(exam.status === 'Completed' || exam.status === 'Expired') && (
           <button
             onClick={onResult}
-            className="w-full py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center space-x-2 border border-slate-700"
+            className="w-full py-3 px-4 rounded-xl bg-[#faedd7] hover:bg-[#f3deba] text-[#064E3B] font-extrabold text-xs uppercase tracking-wider transition-all flex items-center justify-center space-x-2 border-2 border-[#064E3B]"
           >
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <CheckCircle2 className="w-4 h-4 text-[#064E3B]" />
             <span>VIEW EXAMINATION RESULT</span>
           </button>
         )}

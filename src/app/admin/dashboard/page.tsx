@@ -37,18 +37,18 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 text-[#064E3B]">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white tracking-tight">ADMINISTRATOR CONTROL PANEL</h1>
-          <p className="text-xs text-slate-400 mt-1">Overview of university students, exams, AI scoring metrics, and audit logs.</p>
+          <h1 className="text-2xl font-black text-[#064E3B] tracking-tight">ADMINISTRATOR CONTROL PANEL</h1>
+          <p className="text-xs text-[#064E3B]/80 mt-1 font-semibold">Overview of university students, exams, AI scoring metrics, and audit logs.</p>
         </div>
 
         <div className="flex items-center space-x-3">
           <Link
             href="/admin/exams/create"
-            className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold uppercase tracking-wider flex items-center space-x-2 shadow-lg shadow-blue-600/20"
+            className="px-4 py-2.5 rounded-xl bg-[#064E3B] hover:bg-[#04382b] text-[#f8e7c9] text-xs font-black uppercase tracking-wider flex items-center space-x-2 shadow-md border-2 border-[#064E3B]"
           >
             <Plus className="w-4 h-4" />
             <span>Create New Exam</span>
@@ -58,52 +58,52 @@ export default function AdminDashboardPage() {
 
       {/* Requirement #8 Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
-        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-2">
-          <div className="flex items-center justify-between text-slate-400">
-            <span className="text-[10px] font-bold uppercase">Total Students</span>
-            <Users className="w-4 h-4 text-blue-400" />
+        <div className="bg-[#faedd7] border-2 border-[#064E3B]/20 p-5 rounded-2xl space-y-2 shadow-sm">
+          <div className="flex items-center justify-between text-[#064E3B]/70 font-bold">
+            <span className="text-[10px] font-black uppercase">Total Students</span>
+            <Users className="w-4 h-4 text-[#064E3B]" />
           </div>
-          <p className="text-2xl font-black text-white">{loading ? '...' : stats?.totalStudents}</p>
+          <p className="text-2xl font-black text-[#064E3B]">{loading ? '...' : stats?.totalStudents}</p>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-2">
-          <div className="flex items-center justify-between text-slate-400">
-            <span className="text-[10px] font-bold uppercase">Total Exams</span>
-            <BookOpen className="w-4 h-4 text-purple-400" />
+        <div className="bg-[#faedd7] border-2 border-[#064E3B]/20 p-5 rounded-2xl space-y-2 shadow-sm">
+          <div className="flex items-center justify-between text-[#064E3B]/70 font-bold">
+            <span className="text-[10px] font-black uppercase">Total Exams</span>
+            <BookOpen className="w-4 h-4 text-[#064E3B]" />
           </div>
-          <p className="text-2xl font-black text-white">{loading ? '...' : stats?.totalExams}</p>
+          <p className="text-2xl font-black text-[#064E3B]">{loading ? '...' : stats?.totalExams}</p>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-2">
-          <div className="flex items-center justify-between text-slate-400">
-            <span className="text-[10px] font-bold uppercase">Scheduled</span>
-            <Clock className="w-4 h-4 text-amber-400" />
+        <div className="bg-[#faedd7] border-2 border-[#064E3B]/20 p-5 rounded-2xl space-y-2 shadow-sm">
+          <div className="flex items-center justify-between text-[#064E3B]/70 font-bold">
+            <span className="text-[10px] font-black uppercase">Scheduled</span>
+            <Clock className="w-4 h-4 text-[#064E3B]" />
           </div>
-          <p className="text-2xl font-black text-white">{loading ? '...' : stats?.scheduledExams}</p>
+          <p className="text-2xl font-black text-[#064E3B]">{loading ? '...' : stats?.scheduledExams}</p>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-2">
-          <div className="flex items-center justify-between text-slate-400">
-            <span className="text-[10px] font-bold uppercase">Completed</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+        <div className="bg-[#faedd7] border-2 border-[#064E3B]/20 p-5 rounded-2xl space-y-2 shadow-sm">
+          <div className="flex items-center justify-between text-[#064E3B]/70 font-bold">
+            <span className="text-[10px] font-black uppercase">Completed</span>
+            <CheckCircle2 className="w-4 h-4 text-[#064E3B]" />
           </div>
-          <p className="text-2xl font-black text-white">{loading ? '...' : stats?.completedExams}</p>
+          <p className="text-2xl font-black text-[#064E3B]">{loading ? '...' : stats?.completedExams}</p>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-2">
-          <div className="flex items-center justify-between text-slate-400">
-            <span className="text-[10px] font-bold uppercase">Average Score</span>
-            <TrendingUp className="w-4 h-4 text-blue-400" />
+        <div className="bg-[#faedd7] border-2 border-[#064E3B]/20 p-5 rounded-2xl space-y-2 shadow-sm">
+          <div className="flex items-center justify-between text-[#064E3B]/70 font-bold">
+            <span className="text-[10px] font-black uppercase">Average Score</span>
+            <TrendingUp className="w-4 h-4 text-[#064E3B]" />
           </div>
-          <p className="text-2xl font-black text-blue-400">{loading ? '...' : `${stats?.averageScore} / 30`}</p>
+          <p className="text-2xl font-black text-[#064E3B]">{loading ? '...' : `${stats?.averageScore} / 30`}</p>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-2">
-          <div className="flex items-center justify-between text-slate-400">
-            <span className="text-[10px] font-bold uppercase">Highest Score</span>
-            <Award className="w-4 h-4 text-amber-400" />
+        <div className="bg-[#faedd7] border-2 border-[#064E3B]/20 p-5 rounded-2xl space-y-2 shadow-sm">
+          <div className="flex items-center justify-between text-[#064E3B]/70 font-bold">
+            <span className="text-[10px] font-black uppercase">Highest Score</span>
+            <Award className="w-4 h-4 text-[#064E3B]" />
           </div>
-          <p className="text-2xl font-black text-amber-400">{loading ? '...' : `${stats?.highestScore} / 30`}</p>
+          <p className="text-2xl font-black text-[#064E3B]">{loading ? '...' : `${stats?.highestScore} / 30`}</p>
         </div>
       </div>
 
@@ -111,16 +111,16 @@ export default function AdminDashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Link
           href="/admin/students"
-          className="bg-slate-900 border border-slate-800 hover:border-blue-500/50 p-6 rounded-2xl space-y-4 group transition-all shadow-lg"
+          className="bg-[#faedd7] border-2 border-[#064E3B]/25 hover:border-[#064E3B] p-6 rounded-2xl space-y-4 group transition-all shadow-sm hover:shadow-md"
         >
-          <div className="w-12 h-12 bg-blue-950 text-blue-400 rounded-xl flex items-center justify-center border border-blue-800/80">
+          <div className="w-12 h-12 bg-[#064E3B] text-[#f8e7c9] rounded-xl flex items-center justify-center border border-[#064E3B]">
             <Users className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-white group-hover:text-blue-400 transition-colors">Student Management</h3>
-            <p className="text-xs text-slate-400 mt-1">Enroll new students with Roll Numbers & Temporary Passwords, reset access keys, and view history.</p>
+            <h3 className="text-base font-black text-[#064E3B] group-hover:text-[#04382b] transition-colors">Student Management</h3>
+            <p className="text-xs text-[#064E3B]/80 mt-1 font-medium">Enroll new students with Roll Numbers & Temporary Passwords, reset access keys, and view history.</p>
           </div>
-          <div className="flex items-center text-xs font-bold text-blue-400 pt-2">
+          <div className="flex items-center text-xs font-black text-[#064E3B] pt-2">
             <span>Manage Records</span>
             <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
           </div>
@@ -128,16 +128,16 @@ export default function AdminDashboardPage() {
 
         <Link
           href="/admin/questions"
-          className="bg-slate-900 border border-slate-800 hover:border-purple-500/50 p-6 rounded-2xl space-y-4 group transition-all shadow-lg"
+          className="bg-[#faedd7] border-2 border-[#064E3B]/25 hover:border-[#064E3B] p-6 rounded-2xl space-y-4 group transition-all shadow-sm hover:shadow-md"
         >
-          <div className="w-12 h-12 bg-purple-950 text-purple-400 rounded-xl flex items-center justify-center border border-purple-800/80">
+          <div className="w-12 h-12 bg-[#064E3B] text-[#f8e7c9] rounded-xl flex items-center justify-center border border-[#064E3B]">
             <BookOpen className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-white group-hover:text-purple-400 transition-colors">Question Bank</h3>
-            <p className="text-xs text-slate-400 mt-1">Manage MCQ questions, set options A-D, configure authoritative correct options, and edit marks.</p>
+            <h3 className="text-base font-black text-[#064E3B] group-hover:text-[#04382b] transition-colors">Question Bank</h3>
+            <p className="text-xs text-[#064E3B]/80 mt-1 font-medium">Manage MCQ questions, set options A-H, configure authoritative correct options, and edit marks.</p>
           </div>
-          <div className="flex items-center text-xs font-bold text-purple-400 pt-2">
+          <div className="flex items-center text-xs font-black text-[#064E3B] pt-2">
             <span>Question Manager</span>
             <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
           </div>
@@ -145,16 +145,16 @@ export default function AdminDashboardPage() {
 
         <Link
           href="/admin/results"
-          className="bg-slate-900 border border-slate-800 hover:border-emerald-500/50 p-6 rounded-2xl space-y-4 group transition-all shadow-lg"
+          className="bg-[#faedd7] border-2 border-[#064E3B]/25 hover:border-[#064E3B] p-6 rounded-2xl space-y-4 group transition-all shadow-sm hover:shadow-md"
         >
-          <div className="w-12 h-12 bg-emerald-950 text-emerald-400 rounded-xl flex items-center justify-center border border-emerald-800/80">
+          <div className="w-12 h-12 bg-[#064E3B] text-[#f8e7c9] rounded-xl flex items-center justify-center border border-[#064E3B]">
             <ShieldCheck className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-white group-hover:text-emerald-400 transition-colors">Results & Answer Sheets</h3>
-            <p className="text-xs text-slate-400 mt-1">Inspect individual student answer sheets, AI justification evaluations, scores, and proctoring audit trails.</p>
+            <h3 className="text-base font-black text-[#064E3B] group-hover:text-[#04382b] transition-colors">Results & Answer Sheets</h3>
+            <p className="text-xs text-[#064E3B]/80 mt-1 font-medium">Inspect individual student answer sheets, score evaluations, and proctoring audit trails.</p>
           </div>
-          <div className="flex items-center text-xs font-bold text-emerald-400 pt-2">
+          <div className="flex items-center text-xs font-black text-[#064E3B] pt-2">
             <span>View Submissions</span>
             <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
           </div>

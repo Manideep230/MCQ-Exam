@@ -82,36 +82,36 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-[#f8e7c9] text-[#064E3B] flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Background decoration */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-30" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#064E3B0d_1px,transparent_1px),linear-gradient(to_bottom,#064E3B0d_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-40 pointer-events-none" />
       
       <div className="sm:mx-auto sm:w-full sm:max-w-md z-10">
         <div className="flex justify-center items-center space-x-3 mb-2">
-          <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
-            <GraduationCap className="w-7 h-7 text-white" />
+          <div className="w-14 h-14 rounded-2xl bg-[#064E3B] flex items-center justify-center shadow-lg shadow-[#064E3B]/20 border border-[#064E3B]">
+            <GraduationCap className="w-8 h-8 text-[#f8e7c9]" />
           </div>
         </div>
-        <h2 className="mt-2 text-center text-3xl font-extrabold text-white tracking-tight">
+        <h2 className="mt-3 text-center text-3xl font-black text-[#064E3B] tracking-tight">
           AI EXAM PORTAL
         </h2>
-        <p className="mt-1 text-center text-sm text-slate-400 font-medium">
+        <p className="mt-1 text-center text-sm text-[#064E3B]/80 font-bold">
           Official University Online Examination System
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md z-10 px-4">
-        <div className="bg-slate-900/90 backdrop-blur-md border border-slate-800 py-8 px-6 shadow-2xl rounded-2xl sm:px-10">
+        <div className="bg-[#faedd7] backdrop-blur-md border-2 border-[#064E3B]/25 py-8 px-6 shadow-xl rounded-2xl sm:px-10">
           
           {/* Tab Selector */}
-          <div className="flex rounded-xl bg-slate-950/80 p-1 border border-slate-800 mb-6">
+          <div className="flex rounded-xl bg-[#f8e7c9] p-1 border-2 border-[#064E3B]/25 mb-6">
             <button
               type="button"
               onClick={() => { setActiveTab('student'); setError(null); }}
-              className={`flex-1 flex items-center justify-center space-x-2 py-2.5 text-sm font-semibold rounded-lg transition-all ${
+              className={`flex-1 flex items-center justify-center space-x-2 py-2.5 text-xs sm:text-sm font-black rounded-lg transition-all ${
                 activeTab === 'student'
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                  ? 'bg-[#064E3B] text-[#f8e7c9] shadow-md'
+                  : 'text-[#064E3B]/80 hover:text-[#064E3B] hover:bg-[#064E3B]/10'
               }`}
             >
               <User className="w-4 h-4" />
@@ -121,10 +121,10 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => { setActiveTab('admin'); setError(null); }}
-              className={`flex-1 flex items-center justify-center space-x-2 py-2.5 text-sm font-semibold rounded-lg transition-all ${
+              className={`flex-1 flex items-center justify-center space-x-2 py-2.5 text-xs sm:text-sm font-black rounded-lg transition-all ${
                 activeTab === 'admin'
-                  ? 'bg-slate-800 text-white border border-slate-700 shadow-md'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                  ? 'bg-[#064E3B] text-[#f8e7c9] shadow-md'
+                  : 'text-[#064E3B]/80 hover:text-[#064E3B] hover:bg-[#064E3B]/10'
               }`}
             >
               <Shield className="w-4 h-4" />
@@ -133,8 +133,8 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <div className="mb-6 p-4 rounded-xl bg-red-950/60 border border-red-800/80 flex items-start space-x-3 text-red-300 text-sm">
-              <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+            <div className="mb-6 p-4 rounded-xl bg-red-100 border-2 border-red-500/40 flex items-start space-x-3 text-red-900 text-sm font-semibold">
+              <AlertCircle className="w-5 h-5 text-red-700 shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
@@ -143,11 +143,11 @@ export default function LoginPage() {
             /* STUDENT LOGIN FORM */
             <form onSubmit={handleStudentLogin} className="space-y-5">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-black text-[#064E3B] uppercase tracking-wider mb-2">
                   Roll Number
                 </label>
                 <div className="relative rounded-xl shadow-sm">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#064E3B]/60">
                     <User className="h-5 w-5" />
                   </div>
                   <input
@@ -156,17 +156,17 @@ export default function LoginPage() {
                     value={rollNumber}
                     onChange={(e) => setRollNumber(e.target.value)}
                     placeholder="e.g. 23CSE001"
-                    className="block w-full pl-11 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm uppercase tracking-wide transition-all"
+                    className="block w-full pl-11 pr-4 py-3 bg-[#fffdf9] border-2 border-[#064E3B]/30 rounded-xl text-[#064E3B] placeholder-[#064E3B]/40 focus:outline-none focus:ring-2 focus:ring-[#064E3B] focus:border-[#064E3B] text-sm uppercase tracking-wide font-bold transition-all"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-black text-[#064E3B] uppercase tracking-wider mb-2">
                   Password
                 </label>
                 <div className="relative rounded-xl shadow-sm">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#064E3B]/60">
                     <Lock className="h-5 w-5" />
                   </div>
                   <input
@@ -175,7 +175,7 @@ export default function LoginPage() {
                     value={studentPassword}
                     onChange={(e) => setStudentPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="block w-full pl-11 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
+                    className="block w-full pl-11 pr-4 py-3 bg-[#fffdf9] border-2 border-[#064E3B]/30 rounded-xl text-[#064E3B] placeholder-[#064E3B]/40 focus:outline-none focus:ring-2 focus:ring-[#064E3B] focus:border-[#064E3B] text-sm transition-all"
                   />
                 </div>
               </div>
@@ -183,7 +183,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg text-sm font-bold text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+                className="w-full flex justify-center py-3.5 px-4 border-2 border-[#064E3B] rounded-xl shadow-lg text-sm font-black text-[#f8e7c9] bg-[#064E3B] hover:bg-[#04382b] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#064E3B] transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-2"
               >
                 {loading ? 'AUTHENTICATING...' : 'LOGIN TO STUDENT PORTAL'}
               </button>
@@ -192,11 +192,11 @@ export default function LoginPage() {
             /* ADMIN LOGIN FORM */
             <form onSubmit={handleAdminLogin} className="space-y-5">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-black text-[#064E3B] uppercase tracking-wider mb-2">
                   Admin Username
                 </label>
                 <div className="relative rounded-xl shadow-sm">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#064E3B]/60">
                     <Shield className="h-5 w-5" />
                   </div>
                   <input
@@ -205,17 +205,17 @@ export default function LoginPage() {
                     value={adminUsername}
                     onChange={(e) => setAdminUsername(e.target.value)}
                     placeholder="admin"
-                    className="block w-full pl-11 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent text-sm transition-all"
+                    className="block w-full pl-11 pr-4 py-3 bg-[#fffdf9] border-2 border-[#064E3B]/30 rounded-xl text-[#064E3B] placeholder-[#064E3B]/40 focus:outline-none focus:ring-2 focus:ring-[#064E3B] focus:border-[#064E3B] text-sm font-bold transition-all"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-black text-[#064E3B] uppercase tracking-wider mb-2">
                   Admin Password
                 </label>
                 <div className="relative rounded-xl shadow-sm">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#064E3B]/60">
                     <Key className="h-5 w-5" />
                   </div>
                   <input
@@ -224,7 +224,7 @@ export default function LoginPage() {
                     value={adminPassword}
                     onChange={(e) => setAdminPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="block w-full pl-11 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-transparent text-sm transition-all"
+                    className="block w-full pl-11 pr-4 py-3 bg-[#fffdf9] border-2 border-[#064E3B]/30 rounded-xl text-[#064E3B] placeholder-[#064E3B]/40 focus:outline-none focus:ring-2 focus:ring-[#064E3B] focus:border-[#064E3B] text-sm transition-all"
                   />
                 </div>
               </div>
@@ -232,15 +232,15 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center py-3.5 px-4 border border-slate-700 rounded-xl shadow-lg text-sm font-bold text-white bg-slate-800 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+                className="w-full flex justify-center py-3.5 px-4 border-2 border-[#064E3B] rounded-xl shadow-lg text-sm font-black text-[#f8e7c9] bg-[#064E3B] hover:bg-[#04382b] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#064E3B] transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-2"
               >
                 {loading ? 'AUTHENTICATING...' : 'ADMINISTRATOR LOGIN'}
               </button>
             </form>
           )}
 
-          <div className="mt-6 text-center border-t border-slate-800/80 pt-4">
-            <p className="text-xs text-slate-500">
+          <div className="mt-6 text-center border-t-2 border-[#064E3B]/15 pt-4">
+            <p className="text-xs text-[#064E3B]/70 font-medium">
               Need access? Student accounts are created exclusively by the university examination department.
             </p>
           </div>

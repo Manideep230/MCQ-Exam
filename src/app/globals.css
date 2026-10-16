@@ -3,36 +3,38 @@
 @tailwind utilities;
 
 :root {
-  --background: #020617;
-  --foreground: #f8fafc;
+  --background: #f8e7c9;
+  --foreground: #064E3B;
+  --champagne: #f8e7c9;
+  --emerald-ink: #064E3B;
 }
 
 html {
-  background-color: #020617;
-  color-scheme: dark;
+  background-color: #f8e7c9;
+  color-scheme: light;
 }
 
 body {
-  color: #f8fafc;
-  background-color: #020617;
+  color: #064E3B;
+  background-color: #f8e7c9;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   min-height: 100vh;
 }
 
-/* Custom dark scrollbar */
+/* Custom scrollbar in Champagne & Emerald Ink */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #020617;
+  background: #f8e7c9;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #064E3B;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #04382b;
 }
 
 /* Hide scrollbar utility */
