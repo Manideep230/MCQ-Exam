@@ -106,10 +106,10 @@ export default function StudentFeedbackPage() {
     }
   };
 
-  const handleAnswerChange = (questionId: string, value: any) => {
+  const handleAnswerChange = (qId: string, value: any) => {
     setAnswers(prev => ({
       ...prev,
-      [questionId]: value,
+      [qId]: value,
     }));
   };
 
@@ -117,12 +117,16 @@ export default function StudentFeedbackPage() {
     const total = FEEDBACK_QUESTIONS.length;
     let filled = 0;
     FEEDBACK_QUESTIONS.forEach(q => {
-      const val = answers[q.id];
-      if (val !== undefined && val !== null && val !== '') {
+      const v = answers[q.id];
+      if (v !== undefined && v !== null && v !== '') {
         filled++;
       }
     });
-    return { filled, total, percentage: Math.round((filled / total) * 100) };
+    return {
+      filled,
+      total,
+      percentage: Math.round((filled / total) * 100),
+    };
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -130,16 +134,24 @@ export default function StudentFeedbackPage() {
     setErrorMsg(null);
     setSuccessMsg(null);
 
-    // Validate required fields in section 1
-    if (!answers.q1?.trim() || !answers.q2?.trim() || !answers.q3?.trim()) {
-      setActiveSection(1);
-      setErrorMsg('Please complete required details in Section 1 (Full Name, Roll Number, Branch).');
+    // Validate required questions
+    const missing: string[] = [];
+    FEEDBACK_QUESTIONS.forEach(q => {
+      if (q.required) {
+        const val = answers[q.id];
+        if (val === undefined || val === null || val === '') {
+          missing.push(`Q${q.number}: ${q.questionText}`);
+        }
+      }
+    });
+
+    if (missing.length > 0) {
+      setErrorMsg(`Please answer the following required question(s): ${missing.slice(0, 3).join(', ')}${missing.length > 3 ? ` and ${missing.length - 3} more` : ''}`);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
     setSubmitting(true);
-
     try {
       const res = await fetch('/api/student/feedback', {
         method: 'POST',
@@ -165,8 +177,11 @@ export default function StudentFeedbackPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400 text-sm">
-        Loading feedback form...
+      <div className="min-h-screen bg-[#021f18] flex items-center justify-center text-[#f8e7c9] text-sm">
+        <div className="flex items-center space-x-3">
+          <div className="w-5 h-5 border-2 border-[#f8e7c9] border-t-transparent rounded-full animate-spin" />
+          <span>Loading feedback form...</span>
+        </div>
       </div>
     );
   }
@@ -174,33 +189,33 @@ export default function StudentFeedbackPage() {
   const { filled, total, percentage } = calculateCompletion();
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col pb-24">
+    <div className="min-h-screen bg-[#021f18] text-[#faeed9] flex flex-col pb-28">
       {/* Header Bar */}
-      <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-30 shadow-md">
+      <header className="bg-[#03261d]/95 backdrop-blur-md border-b border-[#064E3B] sticky top-0 z-30 shadow-md">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <Link
               href="/student/dashboard"
-              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all"
+              className="p-2 rounded-xl bg-[#064E3B] hover:bg-[#085a44] text-[#f8e7c9] border border-[#f8e7c9]/20 transition-all"
               title="Return to Dashboard"
             >
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <div>
-              <h1 className="text-base font-bold text-white tracking-wide flex items-center space-x-2">
+              <h1 className="text-base font-bold text-[#f8e7c9] tracking-wide flex items-center space-x-2">
                 <span>FSI TRAINING FEEDBACK</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-950 text-blue-400 border border-blue-800 font-mono font-bold">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#064E3B] text-[#f8e7c9] border border-[#f8e7c9]/30 font-mono font-bold">
                   GMRIT
                 </span>
               </h1>
-              <p className="text-xs text-slate-400">Student Portal — Technical Training Evaluation</p>
+              <p className="text-xs text-[#c7b89f]">Student Portal — Technical Training Evaluation</p>
             </div>
           </div>
 
           <div className="flex items-center space-x-3">
-            <div className="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs font-mono">
-              <span className="text-slate-400">Progress:</span>
-              <span className={`font-bold ${percentage === 100 ? 'text-emerald-400' : 'text-blue-400'}`}>
+            <div className="hidden sm:flex items-center space-x-2 px-3.5 py-1.5 rounded-xl bg-[#021f18] border border-[#064E3B] text-xs font-mono">
+              <span className="text-[#c7b89f]">Progress:</span>
+              <span className={`font-bold ${percentage === 100 ? 'text-[#34d399]' : 'text-[#f8e7c9]'}`}>
                 {filled} / {total} ({percentage}%)
               </span>
             </div>
@@ -212,32 +227,32 @@ export default function StudentFeedbackPage() {
       <main className="max-w-5xl w-full mx-auto px-4 sm:px-6 py-8 space-y-8 flex-1">
         
         {/* Banner Card */}
-        <div className="bg-gradient-to-r from-blue-950/70 via-slate-900 to-indigo-950/60 border border-blue-900/60 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+        <div className="bg-gradient-to-r from-[#064E3B] via-[#04382b] to-[#022c22] border border-[#f8e7c9]/25 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
           <div className="relative z-10 space-y-3">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="px-3 py-1 rounded-full bg-blue-600/30 text-blue-300 border border-blue-500/40 text-[10px] font-bold uppercase tracking-widest flex items-center space-x-1.5">
-                <Sparkles className="w-3 h-3 text-blue-400" />
+              <span className="px-3 py-1 rounded-full bg-[#f8e7c9]/15 text-[#f8e7c9] border border-[#f8e7c9]/30 text-[10px] font-bold uppercase tracking-widest flex items-center space-x-1.5">
+                <Sparkles className="w-3 h-3 text-[#f8e7c9]" />
                 <span>OFFICIAL FEEDBACK FORM</span>
               </span>
-              <span className="text-xs text-slate-300 font-semibold">
+              <span className="text-xs text-[#faeed9] font-semibold">
                 GMR Institute of Technology (GMRIT)
               </span>
             </div>
 
-            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-black text-[#f8e7c9] tracking-tight">
               FSI Technical Training — Student Feedback Form
             </h2>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-300 pt-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[#faeed9] pt-1">
               <div>
-                <span className="text-slate-400">Programme:</span> <strong className="text-white">B.Tech Final Year — ECE & EEE</strong>
+                <span className="text-[#c7b89f]">Programme:</span> <strong className="text-[#f8e7c9]">B.Tech Final Year — ECE & EEE</strong>
               </div>
               <div>
-                <span className="text-slate-400">Domains:</span> <span className="text-slate-300">IoT, IIoT, AIoT, Databases, Python, Edge AI, Neural Networks & Project Planning</span>
+                <span className="text-[#c7b89f]">Domains:</span> <span className="text-[#faeed9]">IoT, IIoT, AIoT, Databases, Python, Edge AI, Neural Networks & Project Planning</span>
               </div>
             </div>
 
-            <p className="text-xs text-slate-300/90 leading-relaxed pt-2 border-t border-slate-800/80">
+            <p className="text-xs text-[#faeed9]/90 leading-relaxed pt-2 border-t border-[#064E3B]/80">
               Dear Student, please provide your honest feedback on the FSI technical training sessions. Your feedback will help evaluate the effectiveness of the training, teaching methodology, technical content, practical activities, and overall learning experience. Please answer based on your actual experience.
             </p>
           </div>
@@ -245,9 +260,9 @@ export default function StudentFeedbackPage() {
 
         {/* Google Form Notice Banner if Enabled */}
         {settings.isGoogleFormEnabled && settings.googleFormUrl && (
-          <div className="bg-amber-950/40 border border-amber-800/80 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs">
-            <div className="flex items-center space-x-3 text-amber-300">
-              <Info className="w-5 h-5 text-amber-400 shrink-0" />
+          <div className="bg-[#03261d] border border-[#f8e7c9]/40 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs shadow-lg">
+            <div className="flex items-center space-x-3 text-[#f8e7c9]">
+              <Info className="w-5 h-5 text-[#f8e7c9] shrink-0" />
               <span>
                 <strong>Google Form Available:</strong> You may also submit feedback using the official Google Form if requested by your faculty.
               </span>
@@ -256,7 +271,7 @@ export default function StudentFeedbackPage() {
               href={settings.googleFormUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shrink-0 transition-all shadow-md"
+              className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-[#f8e7c9] hover:bg-[#faeed9] text-[#064E3B] font-bold text-xs shrink-0 transition-all shadow-md"
             >
               <span>Open Google Form</span>
               <ExternalLink className="w-3.5 h-3.5" />
@@ -266,7 +281,7 @@ export default function StudentFeedbackPage() {
 
         {/* Feedback Closed Notice */}
         {!settings.isFormEnabled && (
-          <div className="p-6 rounded-2xl bg-red-950/50 border border-red-800/80 text-red-200 text-center space-y-2">
+          <div className="p-6 rounded-2xl bg-red-950/70 border border-red-800 text-red-200 text-center space-y-2">
             <AlertCircle className="w-8 h-8 text-red-400 mx-auto" />
             <h3 className="font-bold text-base text-white">Feedback Form Currently Closed</h3>
             <p className="text-xs text-red-300">
@@ -277,11 +292,11 @@ export default function StudentFeedbackPage() {
 
         {/* Submission Confirmation Alert */}
         {successMsg && (
-          <div className="p-5 rounded-2xl bg-emerald-950/70 border border-emerald-800 text-emerald-200 text-sm flex items-start space-x-3">
-            <CheckCircle2 className="w-6 h-6 text-emerald-400 shrink-0 mt-0.5" />
+          <div className="p-5 rounded-2xl bg-[#064E3B]/70 border border-[#f8e7c9]/40 text-[#f8e7c9] text-sm flex items-start space-x-3 shadow-xl">
+            <CheckCircle2 className="w-6 h-6 text-[#f8e7c9] shrink-0 mt-0.5" />
             <div>
-              <p className="font-bold text-white">{successMsg}</p>
-              <p className="text-xs text-emerald-300 mt-1">
+              <p className="font-bold text-[#f8e7c9]">{successMsg}</p>
+              <p className="text-xs text-[#faeed9] mt-1">
                 You can review or modify your responses anytime while the form remains active.
               </p>
             </div>
@@ -298,27 +313,27 @@ export default function StudentFeedbackPage() {
 
         {/* Existing Feedback Status Badge if previously submitted */}
         {existingFeedback && !successMsg && (
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs">
+          <div className="bg-[#03261d] border border-[#064E3B] rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs shadow-lg">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 rounded-xl bg-emerald-950 border border-emerald-800 text-emerald-400 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-xl bg-[#064E3B] border border-[#f8e7c9]/30 text-[#f8e7c9] flex items-center justify-center">
                 <CheckCircle2 className="w-4 h-4" />
               </div>
               <div>
-                <span className="font-bold text-white">Feedback Record On File</span>
-                <p className="text-[11px] text-slate-400">
+                <span className="font-bold text-[#f8e7c9]">Feedback Record On File</span>
+                <p className="text-[11px] text-[#c7b89f]">
                   Last submitted on {new Date(existingFeedback.submittedAt).toLocaleDateString()} at{' '}
                   {new Date(existingFeedback.submittedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.
                 </p>
               </div>
             </div>
-            <span className="text-[11px] text-slate-400 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800 font-mono">
+            <span className="text-[11px] text-[#f8e7c9] bg-[#021f18] px-3 py-1.5 rounded-xl border border-[#064E3B] font-mono">
               Overall: {existingFeedback.summaryStats?.overallSatisfaction || 5} ★
             </span>
           </div>
         )}
 
         {/* Navigation Tabs for Sections */}
-        <div className="sticky top-20 z-20 bg-slate-950/90 backdrop-blur-md py-2 border-b border-slate-800 flex overflow-x-auto gap-2 no-scrollbar">
+        <div className="sticky top-20 z-20 bg-[#021f18]/95 backdrop-blur-md py-2 border-b border-[#064E3B] flex overflow-x-auto gap-2 no-scrollbar">
           {FEEDBACK_SECTIONS.map(s => {
             const isActive = activeSection === s.id;
             const secQuestions = FEEDBACK_QUESTIONS.filter(q => q.section === s.id);
@@ -327,6 +342,7 @@ export default function StudentFeedbackPage() {
 
             return (
               <button
+                type="button"
                 key={s.id}
                 onClick={() => {
                   setActiveSection(s.id);
@@ -335,14 +351,14 @@ export default function StudentFeedbackPage() {
                 }}
                 className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center space-x-2 border shrink-0 ${
                   isActive
-                    ? 'bg-blue-600 text-white border-blue-500 shadow-md shadow-blue-600/30'
+                    ? 'bg-[#f8e7c9] text-[#064E3B] border-[#f8e7c9] shadow-lg shadow-[#f8e7c9]/20 font-extrabold'
                     : isComplete
-                    ? 'bg-slate-900 text-emerald-400 border-emerald-800/60 hover:bg-slate-850'
-                    : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200'
+                    ? 'bg-[#03261d] text-[#34d399] border-[#064E3B] hover:border-[#f8e7c9]/40'
+                    : 'bg-[#03261d] text-[#c7b89f] border-[#064E3B]/80 hover:text-[#f8e7c9]'
                 }`}
               >
                 <span>Sec {s.id}</span>
-                {isComplete && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />}
+                {isComplete && <CheckCircle2 className="w-3.5 h-3.5 text-[#34d399]" />}
               </button>
             );
           })}
@@ -357,17 +373,17 @@ export default function StudentFeedbackPage() {
               <section
                 key={section.id}
                 id={`section-${section.id}`}
-                className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl scroll-mt-36"
+                className="bg-[#03261d] border border-[#064E3B] rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl scroll-mt-36"
               >
                 {/* Section Header */}
-                <div className="border-b border-slate-800 pb-4 space-y-1">
+                <div className="border-b border-[#064E3B] pb-4 space-y-1">
                   <div className="flex items-center space-x-2">
-                    <span className="px-2.5 py-0.5 rounded-lg bg-blue-950 text-blue-400 border border-blue-800 text-[10px] font-mono font-bold">
+                    <span className="px-2.5 py-0.5 rounded-lg bg-[#064E3B] text-[#f8e7c9] border border-[#f8e7c9]/20 text-[10px] font-mono font-bold">
                       SECTION {section.id}
                     </span>
-                    <h3 className="text-lg font-bold text-white tracking-wide">{section.title}</h3>
+                    <h3 className="text-lg font-bold text-[#f8e7c9] tracking-wide">{section.title}</h3>
                   </div>
-                  <p className="text-xs text-slate-400">{section.description}</p>
+                  <p className="text-xs text-[#c7b89f]">{section.description}</p>
                 </div>
 
                 {/* Questions Grid */}
@@ -378,19 +394,19 @@ export default function StudentFeedbackPage() {
                     return (
                       <div
                         key={q.id}
-                        className="bg-slate-950/70 border border-slate-800/80 rounded-2xl p-5 space-y-3.5 transition-all hover:border-slate-700/80"
+                        className="bg-[#021f18]/80 border border-[#064E3B]/80 rounded-2xl p-5 space-y-3.5 transition-all hover:border-[#f8e7c9]/30"
                       >
                         {/* Question Label */}
                         <div className="flex items-start justify-between gap-3">
-                          <label className="text-xs sm:text-sm font-semibold text-slate-200 leading-snug">
-                            <span className="font-mono text-blue-400 mr-1.5">{q.number}.</span>
+                          <label className="text-xs sm:text-sm font-semibold text-[#faeed9] leading-snug">
+                            <span className="font-mono text-[#f8e7c9] font-bold mr-1.5">{q.number}.</span>
                             <span>{q.questionText}</span>
-                            {q.required && <span className="text-red-400 ml-1">*</span>}
+                            {q.required && <span className="text-[#f8e7c9] ml-1 font-bold">*</span>}
                           </label>
                         </div>
 
                         {q.helpText && (
-                          <p className="text-[11px] text-slate-400 font-medium">{q.helpText}</p>
+                          <p className="text-[11px] text-[#c7b89f] font-medium">{q.helpText}</p>
                         )}
 
                         {/* Question Type: Short Answer */}
@@ -401,7 +417,7 @@ export default function StudentFeedbackPage() {
                             onChange={(e) => handleAnswerChange(q.id, e.target.value)}
                             placeholder={q.placeholder || 'Your response...'}
                             disabled={!settings.isFormEnabled}
-                            className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 disabled:opacity-50"
+                            className="w-full bg-[#03261d] border border-[#064E3B] rounded-xl px-4 py-2.5 text-xs text-[#faeed9] placeholder-[#a89f90] focus:outline-none focus:border-[#f8e7c9] focus:ring-1 focus:ring-[#f8e7c9] disabled:opacity-50"
                           />
                         )}
 
@@ -413,7 +429,7 @@ export default function StudentFeedbackPage() {
                             onChange={(e) => handleAnswerChange(q.id, e.target.value)}
                             placeholder={q.placeholder || 'Type your detailed feedback here...'}
                             disabled={!settings.isFormEnabled}
-                            className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 disabled:opacity-50 resize-y"
+                            className="w-full bg-[#03261d] border border-[#064E3B] rounded-xl px-4 py-2.5 text-xs text-[#faeed9] placeholder-[#a89f90] focus:outline-none focus:border-[#f8e7c9] focus:ring-1 focus:ring-[#f8e7c9] disabled:opacity-50 resize-y"
                           />
                         )}
 
@@ -430,14 +446,14 @@ export default function StudentFeedbackPage() {
                                   disabled={!settings.isFormEnabled}
                                   className={`p-3 rounded-xl border text-left text-xs font-medium transition-all flex items-start space-x-2.5 ${
                                     isChecked
-                                      ? 'bg-blue-950/70 border-blue-500 text-white shadow-md'
-                                      : 'bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700'
+                                      ? 'bg-[#064E3B] border-2 border-[#f8e7c9] text-[#f8e7c9] shadow-md shadow-[#064E3B]/50'
+                                      : 'bg-[#03261d] border border-[#064E3B]/80 text-[#faeed9]/80 hover:border-[#f8e7c9]/40 hover:text-[#f8e7c9]'
                                   }`}
                                 >
                                   <div className={`w-4 h-4 rounded-full border shrink-0 mt-0.5 flex items-center justify-center ${
-                                    isChecked ? 'border-blue-500 bg-blue-600' : 'border-slate-700'
+                                    isChecked ? 'border-[#f8e7c9] bg-[#f8e7c9]' : 'border-[#064E3B]'
                                   }`}>
-                                    {isChecked && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                    {isChecked && <div className="w-1.5 h-1.5 rounded-full bg-[#064E3B]" />}
                                   </div>
                                   <span className="leading-tight">{opt}</span>
                                 </button>
@@ -460,15 +476,15 @@ export default function StudentFeedbackPage() {
                                   className={`px-3 py-2 rounded-xl text-xs font-bold transition-all border ${
                                     isSelected
                                       ? opt.value === 5
-                                        ? 'bg-emerald-950 text-emerald-300 border-emerald-500 shadow-sm'
+                                        ? 'bg-[#064E3B] text-[#f8e7c9] border-2 border-[#f8e7c9] shadow-md shadow-[#064E3B]/50'
                                         : opt.value === 4
-                                        ? 'bg-blue-950 text-blue-300 border-blue-500 shadow-sm'
+                                        ? 'bg-[#04382b] text-[#f8e7c9] border border-[#f8e7c9]/80 shadow-sm'
                                         : opt.value === 3
-                                        ? 'bg-amber-950 text-amber-300 border-amber-500'
+                                        ? 'bg-[#03261d] text-[#eed19c] border border-[#e3b970]'
                                         : opt.value === 0
-                                        ? 'bg-slate-800 text-slate-300 border-slate-600'
-                                        : 'bg-red-950 text-red-300 border-red-500'
-                                      : 'bg-slate-900 text-slate-400 border-slate-800 hover:border-slate-700 hover:text-slate-200'
+                                        ? 'bg-[#021f18] text-[#c7b89f] border border-[#064E3B]'
+                                        : 'bg-red-950/70 text-red-300 border border-red-500'
+                                      : 'bg-[#03261d] text-[#c7b89f] border border-[#064E3B]/80 hover:border-[#f8e7c9]/40 hover:text-[#f8e7c9]'
                                   }`}
                                 >
                                   {opt.label}
@@ -492,13 +508,13 @@ export default function StudentFeedbackPage() {
                                   className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all border ${
                                     isSelected
                                       ? opt.value === 5
-                                        ? 'bg-emerald-950 text-emerald-300 border-emerald-500 shadow-sm'
+                                        ? 'bg-[#064E3B] text-[#f8e7c9] border-2 border-[#f8e7c9] shadow-md shadow-[#064E3B]/50'
                                         : opt.value === 4
-                                        ? 'bg-blue-950 text-blue-300 border-blue-500 shadow-sm'
+                                        ? 'bg-[#04382b] text-[#f8e7c9] border border-[#f8e7c9]/80 shadow-sm'
                                         : opt.value === 3
-                                        ? 'bg-amber-950 text-amber-300 border-amber-500'
-                                        : 'bg-red-950 text-red-300 border-red-500'
-                                      : 'bg-slate-900 text-slate-400 border-slate-800 hover:border-slate-700 hover:text-slate-200'
+                                        ? 'bg-[#03261d] text-[#eed19c] border border-[#e3b970]'
+                                        : 'bg-red-950/70 text-red-300 border border-red-500'
+                                      : 'bg-[#03261d] text-[#c7b89f] border border-[#064E3B]/80 hover:border-[#f8e7c9]/40 hover:text-[#f8e7c9]'
                                   }`}
                                 >
                                   {opt.label}
@@ -517,15 +533,15 @@ export default function StudentFeedbackPage() {
           })}
 
           {/* Sticky Submit Bar */}
-          <div className="fixed bottom-0 inset-x-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 p-4 z-30 shadow-2xl">
+          <div className="fixed bottom-0 inset-x-0 bg-[#03261d]/95 backdrop-blur-md border-t border-[#064E3B] p-4 z-30 shadow-2xl">
             <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
               <div className="flex items-center space-x-3 text-xs">
-                <span className="font-mono text-slate-400">
-                  Filled: <strong className="text-white">{filled}</strong> of {total} questions
+                <span className="font-mono text-[#c7b89f]">
+                  Filled: <strong className="text-[#f8e7c9]">{filled}</strong> of {total} questions
                 </span>
-                <div className="hidden sm:block w-32 bg-slate-800 rounded-full h-2 overflow-hidden">
+                <div className="hidden sm:block w-32 bg-[#021f18] rounded-full h-2 overflow-hidden border border-[#064E3B]">
                   <div
-                    className="bg-blue-500 h-2 transition-all duration-300"
+                    className="bg-[#f8e7c9] h-2 transition-all duration-300"
                     style={{ width: `${percentage}%` }}
                   />
                 </div>
@@ -534,7 +550,7 @@ export default function StudentFeedbackPage() {
               <div className="flex items-center space-x-3">
                 <Link
                   href="/student/dashboard"
-                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-all"
+                  className="px-4 py-2.5 rounded-xl bg-[#021f18] hover:bg-[#064E3B] text-[#faeed9] font-bold text-xs border border-[#064E3B] transition-all"
                 >
                   Cancel
                 </Link>
@@ -542,7 +558,7 @@ export default function StudentFeedbackPage() {
                 <button
                   type="submit"
                   disabled={submitting || !settings.isFormEnabled}
-                  className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-blue-600/30 flex items-center space-x-2 transition-all"
+                  className="px-6 py-2.5 rounded-xl bg-[#f8e7c9] hover:bg-[#faeed9] disabled:opacity-50 text-[#064E3B] font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-[#f8e7c9]/20 flex items-center space-x-2 transition-all"
                 >
                   <Send className="w-3.5 h-3.5" />
                   <span>{submitting ? 'Submitting...' : existingFeedback ? 'Update Feedback' : 'Submit Feedback'}</span>
